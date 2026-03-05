@@ -1,0 +1,24 @@
+{
+  "folders": [
+    { "name": "Frontend", "path": "frontend" },
+    { "name": "Backend", "path": "backend" }
+  ],
+  "settings": {
+    "editor.formatOnSave": true,
+    "python.defaultInterpreterPath": "./backend/venv/bin/python"
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Run Backend",
+        "type": "python",
+        "request": "launch",
+        "module": "uvicorn",
+        "args": ["main:app", "--reload", "--port", "8000"],
+        "cwd": "${workspaceFolder:Backend}",
+        "envFile": "${workspaceFolder:Backend}/.env"
+      }
+    ]
+  }
+}
