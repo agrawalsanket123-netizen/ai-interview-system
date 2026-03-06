@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
+import BASE_URL from '../api'
 
 export default function Dashboard() {
   const [aptitude, setAptitude] = useState([])
@@ -9,8 +10,8 @@ export default function Dashboard() {
 
   useEffect(() => {
     Promise.all([
-      axios.get('/api/results/aptitude'),
-      axios.get('/api/results/interview'),
+      axios.get(`${BASE_URL}/api/results/aptitude`),
+      axios.get(`${BASE_URL}/api/results/interview`),
     ]).then(([a, b]) => {
       setAptitude(a.data.results.reverse())
       setInterview(b.data.results.reverse())

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import BASE_URL from '../api'
 
 export default function AptitudeTest() {
   const [questions, setQuestions] = useState([])
@@ -11,7 +12,7 @@ export default function AptitudeTest() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    axios.get('/api/aptitude/questions').then(r => {
+    axios.get(`${BASE_URL}/api/aptitude/questions`).then(r => {
       setQuestions(r.data.questions)
       setLoading(false)
     })
@@ -26,7 +27,7 @@ export default function AptitudeTest() {
     }
     setSubmitting(true)
     const ordered = questions.map(q => answers[q.id] || '')
-    const res = await axios.post('/api/aptitude/submit', { answers: ordered })
+    const res = await axios.post(`${BASE_URL}/api/aptitude/submit`, { answers: ordered })
     navigate('/aptitude/result', { state: res.data })
   }
 
