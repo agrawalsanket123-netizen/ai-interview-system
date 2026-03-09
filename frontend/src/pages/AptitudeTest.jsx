@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import BASE_URL from '../api'
+import { useAuth } from '../AuthContext'
 
 export default function AptitudeTest() {
   const [questions, setQuestions] = useState([])
@@ -10,6 +11,7 @@ export default function AptitudeTest() {
   const [submitting, setSubmitting] = useState(false)
   const [current, setCurrent] = useState(0)
   const navigate = useNavigate()
+  const { token } = useAuth()
 
   useEffect(() => {
     axios.get(`${BASE_URL}/api/aptitude/questions`).then(r => {
@@ -27,7 +29,9 @@ export default function AptitudeTest() {
     }
     setSubmitting(true)
     const ordered = questions.map(q => answers[q.id] || '')
-    const res = await axios.post(`${BASE_URL}/api/aptitude/submit`, { answers: ordered })
+    const res = await axios.post(`${BASE_URL}/api/aptitude/submit`, { answers: ordered }, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
     navigate('/aptitude/result', { state: res.data })
   }
 
@@ -115,54 +119,18 @@ function PageLoader() {
 const styles = {
   main: { maxWidth: '720px', margin: '0 auto', padding: '3rem 2rem' },
   header: { display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2.5rem' },
-  label: {
-    fontSize: '0.7rem', letterSpacing: '0.18em', textTransform: 'uppercase',
-    color: 'var(--accent)', fontFamily: 'var(--font-mono)',
-  },
+  label: { fontSize: '0.7rem', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--accent)', fontFamily: 'var(--font-mono)' },
   progress: { display: 'flex', gap: '0.4rem', flex: 1 },
   dot: { width: '24px', height: '4px', borderRadius: '2px', transition: 'background 0.3s' },
   counter: { fontSize: '0.75rem', color: 'var(--text3)', fontFamily: 'var(--font-mono)' },
-  qCard: {
-    background: 'var(--surface)',
-    border: '1px solid var(--border)',
-    borderRadius: '4px',
-    padding: '2.5rem',
-    marginBottom: '2rem',
-  },
-  qNum: {
-    fontFamily: 'var(--font-display)',
-    fontSize: '3rem', fontWeight: 800,
-    color: 'var(--text3)', marginBottom: '1rem',
-  },
+  qCard: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '4px', padding: '2.5rem', marginBottom: '2rem' },
+  qNum: { fontFamily: 'var(--font-display)', fontSize: '3rem', fontWeight: 800, color: 'var(--text3)', marginBottom: '1rem' },
   qText: { fontSize: '1.1rem', lineHeight: 1.6, marginBottom: '2rem', color: 'var(--text)' },
   options: { display: 'flex', flexDirection: 'column', gap: '0.75rem' },
-  option: {
-    display: 'flex', alignItems: 'center', gap: '1rem',
-    background: 'var(--surface2)', border: '1px solid var(--border)',
-    padding: '1rem 1.25rem', borderRadius: '3px',
-    color: 'var(--text)', fontSize: '0.9rem', textAlign: 'left',
-    transition: 'all 0.2s',
-  },
-  optionSelected: {
-    border: '1px solid var(--accent)',
-    background: 'rgba(0,255,135,0.05)',
-    color: 'var(--accent)',
-  },
-  optKey: {
-    fontFamily: 'var(--font-display)', fontWeight: 700,
-    fontSize: '0.9rem', minWidth: '1.25rem', color: 'var(--text3)',
-  },
+  option: { display: 'flex', alignItems: 'center', gap: '1rem', background: 'var(--surface2)', border: '1px solid var(--border)', padding: '1rem 1.25rem', borderRadius: '3px', color: 'var(--text)', fontSize: '0.9rem', textAlign: 'left', transition: 'all 0.2s' },
+  optionSelected: { border: '1px solid var(--accent)', background: 'rgba(0,255,135,0.05)', color: 'var(--accent)' },
+  optKey: { fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.9rem', minWidth: '1.25rem', color: 'var(--text3)' },
   navRow: { display: 'flex', justifyContent: 'space-between' },
-  navBtn: {
-    background: 'transparent', border: '1px solid var(--border)',
-    color: 'var(--text2)', padding: '0.75rem 1.5rem',
-    fontSize: '0.8rem', letterSpacing: '0.08em', borderRadius: '2px',
-    transition: 'all 0.2s',
-  },
-  submitBtn: {
-    background: 'var(--accent)', color: '#000',
-    border: 'none', padding: '0.75rem 2rem',
-    fontWeight: 700, fontSize: '0.85rem', letterSpacing: '0.08em',
-    borderRadius: '2px', transition: 'opacity 0.2s',
-  }
+  navBtn: { background: 'transparent', border: '1px solid var(--border)', color: 'var(--text2)', padding: '0.75rem 1.5rem', fontSize: '0.8rem', letterSpacing: '0.08em', borderRadius: '2px', transition: 'all 0.2s' },
+  submitBtn: { background: 'var(--accent)', color: '#000', border: 'none', padding: '0.75rem 2rem', fontWeight: 700, fontSize: '0.85rem', letterSpacing: '0.08em', borderRadius: '2px', transition: 'opacity 0.2s' }
 }

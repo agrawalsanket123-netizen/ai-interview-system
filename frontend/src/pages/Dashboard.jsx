@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import BASE_URL from '../api'
+import { useAuth } from '../AuthContext'
 
 export default function Dashboard() {
+  const { token } = useAuth()
   const [aptitude, setAptitude] = useState([])
   const [interview, setInterview] = useState([])
   const [loading, setLoading] = useState(true)
@@ -10,11 +12,11 @@ export default function Dashboard() {
 
   useEffect(() => {
     Promise.all([
-      axios.get(`${BASE_URL}/api/results/aptitude`),
-      axios.get(`${BASE_URL}/api/results/interview`),
+      axios.get(`${BASE_URL}/api/results/aptitude`, { headers: { Authorization: `Bearer ${token}` } }),
+      axios.get(`${BASE_URL}/api/results/interview`, { headers: { Authorization: `Bearer ${token}` } }),
     ]).then(([a, b]) => {
-      setAptitude(a.data.results.reverse())
-      setInterview(b.data.results.reverse())
+      setAptitude(a.data.results || [])
+      setInterview(b.data.results || [])
       setLoading(false)
     }).catch(() => setLoading(false))
   }, [])
@@ -25,14 +27,18 @@ export default function Dashboard() {
     </div>
   )
 
-  // Group interview results by session (timestamp prefix)
-  const grouped = {}
-  interview.forEach(r => {
-    const key = `${r.field}__${r.timestamp.slice(0, 16)}`
-    if (!grouped[key]) grouped[key] = { field: r.field, timestamp: r.timestamp, items: [] }
-    grouped[key].items.push(r)
-  })
-  const sessions = Object.values(grouped).slice(0, 10)
+  const formatDate = (iso) => {
+    if (!iso) return '—'
+    return new Date(iso).toLocaleString()
+  }
+
+  const avgAptitude = aptitude.length > 0
+    ? Math.round((aptitude.reduce((s, a) => s + (a.score / a.total) * 100, 0) / aptitude.length))
+    : null
+
+  const avgInterview = interview.length > 0
+    ? (interview.reduce((s, r) => s + (r.overall_score || 0), 0) / interview.length).toFixed(1)
+    : null
 
   return (
     <main style={styles.main}>
@@ -48,26 +54,15 @@ export default function Dashboard() {
           <div style={styles.statLabel}>Aptitude Tests</div>
         </div>
         <div style={styles.statCard}>
-          <div style={styles.statNum}>{sessions.length}</div>
+          <div style={styles.statNum}>{interview.length}</div>
           <div style={styles.statLabel}>Interviews Done</div>
         </div>
         <div style={styles.statCard}>
-          <div style={styles.statNum}>
-            {aptitude.length > 0
-              ? Math.round((aptitude.reduce((s, a) => s + parseInt(a.score), 0) / aptitude.length / 5) * 100) + '%'
-              : '—'}
-          </div>
+          <div style={styles.statNum}>{avgAptitude !== null ? avgAptitude + '%' : '—'}</div>
           <div style={styles.statLabel}>Avg Aptitude Score</div>
         </div>
         <div style={styles.statCard}>
-          <div style={styles.statNum}>
-            {sessions.length > 0
-              ? (sessions.reduce((sum, s) => {
-                  const avg = s.items.reduce((a, b) => a + parseFloat(b.score), 0) / s.items.length
-                  return sum + avg
-                }, 0) / sessions.length).toFixed(1)
-              : '—'}
-          </div>
+          <div style={styles.statNum}>{avgInterview !== null ? avgInterview + '/10' : '—'}</div>
           <div style={styles.statLabel}>Avg Interview Score</div>
         </div>
       </div>
@@ -88,34 +83,39 @@ export default function Dashboard() {
       {/* Interview Tab */}
       {tab === 'interview' && (
         <div>
-          {sessions.length === 0 ? (
+          {interview.length === 0 ? (
             <Empty label="No interview results yet." />
-          ) : sessions.map((s, i) => {
-            const avg = (s.items.reduce((a, b) => a + parseFloat(b.score), 0) / s.items.length).toFixed(1)
-            const color = avg >= 7 ? 'var(--accent)' : avg >= 5 ? '#ffd166' : 'var(--accent3)'
+          ) : interview.map((r, i) => {
+            const score = r.overall_score || 0
+            const color = score >= 7 ? 'var(--accent)' : score >= 5 ? '#ffd166' : 'var(--accent3)'
+            const responses = Array.isArray(r.responses) ? r.responses : []
             return (
               <div key={i} style={styles.sessionCard}>
                 <div style={styles.sessionHeader}>
                   <div>
                     <div style={{ ...styles.fieldTag, color }}>
-                      {s.field.replace(/([A-Z])/g, ' $1').trim()}
+                      {r.field?.replace(/([A-Z])/g, ' $1').trim()}
                     </div>
-                    <div style={styles.ts}>{s.timestamp}</div>
+                    <div style={styles.ts}>{formatDate(r.created_at)}</div>
                   </div>
-                  <div style={{ ...styles.sessionScore, color }}>{avg}/10</div>
+                  <div style={{ ...styles.sessionScore, color }}>{score}/10</div>
                 </div>
-                {s.items.map((item, j) => (
-                  <div key={j} style={styles.itemRow}>
-                    <div style={styles.itemQ}>{item.question}</div>
-                    <div style={styles.itemMeta}>
-                      <span style={{ color: 'var(--text2)', fontSize: '0.75rem' }}>Score: </span>
-                      <strong style={{ color, fontSize: '0.8rem' }}>{item.score}/10</strong>
-                      <span style={{ color: 'var(--text2)', fontSize: '0.75rem', marginLeft: '0.75rem' }}>
-                        {item.feedback}
-                      </span>
+                {responses.map((item, j) => {
+                  const itemScore = item.score || 0
+                  const itemColor = itemScore >= 7 ? 'var(--accent)' : itemScore >= 5 ? '#ffd166' : 'var(--accent3)'
+                  return (
+                    <div key={j} style={styles.itemRow}>
+                      <div style={styles.itemQ}>{item.question}</div>
+                      <div style={styles.itemMeta}>
+                        <span style={{ color: 'var(--text2)', fontSize: '0.75rem' }}>Score: </span>
+                        <strong style={{ color: itemColor, fontSize: '0.8rem' }}>{itemScore}/10</strong>
+                        <span style={{ color: 'var(--text2)', fontSize: '0.75rem', marginLeft: '0.75rem' }}>
+                          {item.feedback}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             )
           })}
@@ -131,7 +131,7 @@ export default function Dashboard() {
             <table style={styles.table}>
               <thead>
                 <tr>
-                  {['Timestamp', 'Score', 'Out of', 'Percentage'].map(h => (
+                  {['Date', 'Score', 'Out of', 'Percentage'].map(h => (
                     <th key={h} style={styles.th}>{h}</th>
                   ))}
                 </tr>
@@ -141,7 +141,7 @@ export default function Dashboard() {
                   const pct = Math.round((r.score / r.total) * 100)
                   return (
                     <tr key={i} style={styles.tr}>
-                      <td style={styles.td}>{r.timestamp}</td>
+                      <td style={styles.td}>{formatDate(r.created_at)}</td>
                       <td style={styles.td}>{r.score}</td>
                       <td style={styles.td}>{r.total}</td>
                       <td style={styles.td}>
@@ -178,33 +178,15 @@ const styles = {
   pageHeader: { marginBottom: '2.5rem' },
   label: { fontSize: '0.7rem', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--text3)', marginBottom: '0.5rem' },
   h2: { fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 800 },
-  stats: {
-    display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-    gap: '1rem', marginBottom: '2.5rem',
-  },
-  statCard: {
-    background: 'var(--surface)', border: '1px solid var(--border)',
-    borderRadius: '4px', padding: '1.5rem', textAlign: 'center',
-  },
+  stats: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '1rem', marginBottom: '2.5rem' },
+  statCard: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '4px', padding: '1.5rem', textAlign: 'center' },
   statNum: { fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 800, color: 'var(--accent)', marginBottom: '0.25rem' },
   statLabel: { fontSize: '0.7rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text3)' },
   tabs: { display: 'flex', gap: '0', marginBottom: '1.5rem', borderBottom: '1px solid var(--border)' },
-  tab: {
-    background: 'transparent', border: 'none',
-    color: 'var(--text3)', padding: '0.75rem 1.5rem',
-    fontSize: '0.8rem', letterSpacing: '0.1em',
-    borderBottom: '2px solid transparent', marginBottom: '-1px',
-    transition: 'all 0.2s',
-  },
+  tab: { background: 'transparent', border: 'none', borderBottom: '2px solid transparent', color: 'var(--text3)', padding: '0.75rem 1.5rem', fontSize: '0.8rem', letterSpacing: '0.1em', marginBottom: '-1px', transition: 'all 0.2s', cursor: 'pointer' },
   tabActive: { color: 'var(--accent)', borderBottomColor: 'var(--accent)' },
-  sessionCard: {
-    background: 'var(--surface)', border: '1px solid var(--border)',
-    borderRadius: '4px', marginBottom: '1.25rem', overflow: 'hidden',
-  },
-  sessionHeader: {
-    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-    padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border)',
-  },
+  sessionCard: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '4px', marginBottom: '1.25rem', overflow: 'hidden' },
+  sessionHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border)' },
   fieldTag: { fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem', marginBottom: '0.25rem' },
   ts: { fontSize: '0.7rem', color: 'var(--text3)' },
   sessionScore: { fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.75rem' },
@@ -212,11 +194,7 @@ const styles = {
   itemQ: { fontSize: '0.85rem', color: 'var(--text)', marginBottom: '0.35rem' },
   itemMeta: { display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.25rem' },
   table: { width: '100%', borderCollapse: 'collapse' },
-  th: {
-    fontSize: '0.65rem', letterSpacing: '0.15em', textTransform: 'uppercase',
-    color: 'var(--text3)', textAlign: 'left', padding: '0.75rem 1rem',
-    borderBottom: '1px solid var(--border)',
-  },
+  th: { fontSize: '0.65rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--text3)', textAlign: 'left', padding: '0.75rem 1rem', borderBottom: '1px solid var(--border)' },
   tr: { borderBottom: '1px solid var(--border)' },
   td: { fontSize: '0.85rem', color: 'var(--text2)', padding: '0.9rem 1rem' },
 }

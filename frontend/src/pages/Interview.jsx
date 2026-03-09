@@ -2,9 +2,11 @@ import { useEffect, useState, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import BASE_URL from '../api'
+import { useAuth } from '../AuthContext'
 
 export default function Interview() {
   const { field } = useParams()
+  const { token } = useAuth()
   const navigate = useNavigate()
   const [questions, setQuestions] = useState([])
   const [current, setCurrent] = useState(0)
@@ -119,7 +121,7 @@ export default function Interview() {
     setSubmitting(true)
     const responses = questions.map((q, i) => ({ question: q, answer: answers[i] || '' }))
     try {
-      const res = await axios.post(`${BASE_URL}/api/interview/evaluate`, { field, responses })
+      const res = await axios.post(`${BASE_URL}/api/interview/evaluate`, { field, responses }, { headers: { Authorization: `Bearer ${token}` } })
       navigate('/interview/result', { state: res.data })
     } catch (e) {
       speak('Evaluation failed. Please make sure the backend is running.')
