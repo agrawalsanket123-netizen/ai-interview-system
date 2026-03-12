@@ -2,8 +2,8 @@ import { useNavigate } from 'react-router-dom'
 
 const FIELDS = [
   { id: 'DataAnalysis', label: 'Data Analysis', desc: 'Pandas, NumPy, EDA, visualization, statistical methods', icon: '📊', color: 'rgba(167,212,245,0.1)', accent: 'var(--accent3)', border: 'rgba(167,212,245,0.3)' },
-  { id: 'WebDevelopment', label: 'Web Development', desc: 'HTML, CSS, JavaScript, REST APIs, responsive design', icon: '🌐', color: 'rgba(139,167,245,0.1)', accent: 'var(--accent)', border: 'rgba(139,167,245,0.3)' },
-  { id: 'MachineLearning', label: 'Machine Learning', desc: 'Supervised/unsupervised learning, models, evaluation', icon: '🤖', color: 'rgba(184,167,245,0.1)', accent: 'var(--accent2)', border: 'rgba(184,167,245,0.3)' },
+  { id: 'WebDevelopment', label: 'Web Development', desc: 'HTML, CSS, JavaScript, REST APIs, responsive design', icon: '🌐', color: 'rgba(91,106,191,0.1)', accent: 'var(--accent)', border: 'rgba(91,106,191,0.3)' },
+  { id: 'MachineLearning', label: 'Machine Learning', desc: 'Supervised/unsupervised learning, models, evaluation', icon: '🤖', color: 'rgba(124,106,191,0.1)', accent: 'var(--accent2)', border: 'rgba(124,106,191,0.3)' },
   { id: 'CyberSecurity', label: 'Cyber Security', desc: 'Encryption, firewalls, threat analysis, network security', icon: '🔒', color: 'rgba(123,229,192,0.1)', accent: 'var(--success)', border: 'rgba(123,229,192,0.3)' },
 ]
 

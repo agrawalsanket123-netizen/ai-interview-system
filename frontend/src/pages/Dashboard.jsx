@@ -51,10 +51,10 @@ export default function Dashboard() {
       {/* Stats row */}
       <div style={s.statsRow} className="stagger-1">
         {[
-          { label: 'Total Tests', val: totalTests, color: 'var(--accent)', bg: 'rgba(139,167,245,0.08)', border: 'rgba(139,167,245,0.2)' },
+          { label: 'Total Tests', val: totalTests, color: 'var(--accent)', bg: 'rgba(91,106,191,0.08)', border: 'rgba(91,106,191,0.2)' },
           { label: 'Aptitude Tests', val: aptitude.length, color: 'var(--accent3)', bg: 'rgba(167,212,245,0.08)', border: 'rgba(167,212,245,0.2)' },
           { label: 'Best Aptitude', val: bestApt !== null ? `${bestApt}%` : '—', color: 'var(--success)', bg: 'rgba(123,229,192,0.08)', border: 'rgba(123,229,192,0.2)' },
-          { label: 'Best Interview', val: bestInt !== null ? `${bestInt}/10` : '—', color: 'var(--accent2)', bg: 'rgba(184,167,245,0.08)', border: 'rgba(184,167,245,0.2)' },
+          { label: 'Best Interview', val: bestInt !== null ? `${bestInt}/10` : '—', color: 'var(--accent2)', bg: 'rgba(124,106,191,0.08)', border: 'rgba(124,106,191,0.2)' },
         ].map((st, i) => (
           <div key={i} style={{ ...s.statCard, background: st.bg, border: `1px solid ${st.border}` }}>
             <div style={{ ...s.statVal, color: st.color }}>{st.val}</div>
@@ -154,7 +154,7 @@ const s = {
   tag: { fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent)', marginBottom: '0.3rem' },
   title: { fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 800, color: 'var(--text)' },
   btnGroup: { display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' },
-  btnPrimary: { background: 'linear-gradient(135deg, var(--accent), var(--accent2))', color: '#07071a', padding: '0.65rem 1.25rem', fontWeight: 700, fontSize: '0.875rem', borderRadius: 'var(--radius-sm)' },
+  btnPrimary: { background: 'linear-gradient(135deg, var(--accent), var(--accent2))', color: '#fff', padding: '0.65rem 1.25rem', fontWeight: 700, fontSize: '0.875rem', borderRadius: 'var(--radius-sm)' },
   btnSecondary: { background: 'var(--surface)', border: '1px solid var(--border2)', color: 'var(--text)', padding: '0.65rem 1.25rem', fontSize: '0.875rem', fontWeight: 500, borderRadius: 'var(--radius-sm)' },
   statsRow: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', marginBottom: '3rem' },
   statCard: { borderRadius: 'var(--radius)', padding: '1.25rem 1.5rem' },

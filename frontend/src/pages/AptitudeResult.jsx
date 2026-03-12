@@ -76,6 +76,6 @@ const s = {
   rowMeta: { display: 'flex', gap: '0.75rem', flexWrap: 'wrap' },
   metaTag: { fontSize: '0.8rem', color: 'var(--text2)' },
   actions: { display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '2rem' },
-  btnPrimary: { background: 'linear-gradient(135deg, var(--accent), var(--accent2))', color: '#07071a', padding: '0.875rem 1.75rem', fontWeight: 700, fontSize: '0.9rem', borderRadius: 'var(--radius-sm)' },
+  btnPrimary: { background: 'linear-gradient(135deg, var(--accent), var(--accent2))', color: '#fff', padding: '0.875rem 1.75rem', fontWeight: 700, fontSize: '0.9rem', borderRadius: 'var(--radius-sm)' },
   btnSecondary: { background: 'var(--surface)', border: '1px solid var(--border2)', color: 'var(--text)', padding: '0.875rem 1.5rem', fontSize: '0.9rem', fontWeight: 500, borderRadius: 'var(--radius-sm)' },
 }

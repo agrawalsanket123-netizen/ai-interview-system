@@ -43,7 +43,6 @@ export default function Register() {
           </div>
         </div>
       </div>
-
       <div style={s.right}>
         <div style={s.card}>
           {success ? (
@@ -57,9 +56,7 @@ export default function Register() {
             <>
               <h1 style={s.title}>Create account</h1>
               <p style={s.subtitle}>Already have one? <Link to="/login" style={{ color: 'var(--accent)', fontWeight: 600 }}>Sign in</Link></p>
-
               {error && <div style={s.error}>{error}</div>}
-
               {[
                 { label: 'Full Name', val: fullName, set: setFullName, type: 'text', ph: 'Your Name' },
                 { label: 'Email address', val: email, set: setEmail, type: 'email', ph: 'you@example.com' },
@@ -67,12 +64,9 @@ export default function Register() {
               ].map(f => (
                 <div key={f.label} style={s.field}>
                   <label style={s.label}>{f.label}</label>
-                  <input style={s.input} type={f.type} placeholder={f.ph}
-                    value={f.val} onChange={e => f.set(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleRegister()} />
+                  <input style={s.input} type={f.type} placeholder={f.ph} value={f.val} onChange={e => f.set(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleRegister()} />
                 </div>
               ))}
-
               <button style={{ ...s.btn, opacity: loading ? 0.7 : 1 }} className="btn-glow" onClick={handleRegister} disabled={loading}>
                 {loading ? 'Creating...' : 'Create Account →'}
               </button>
@@ -86,11 +80,11 @@ export default function Register() {
 
 const s = {
   page: { display: 'flex', minHeight: '100vh' },
-  left: { flex: 1, background: 'linear-gradient(135deg, #0d0d28 0%, #10102e 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '3rem', position: 'relative', overflow: 'hidden', borderRight: '1px solid var(--border)' },
-  leftGlow: { position: 'absolute', top: '30%', right: '20%', width: '400px', height: '400px', pointerEvents: 'none', background: 'radial-gradient(circle, rgba(184,167,245,0.1) 0%, transparent 65%)' },
+  left: { flex: 1, background: 'linear-gradient(135deg, #eeeaf5 0%, #e8e2f5 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '3rem', position: 'relative', overflow: 'hidden', borderRight: '1px solid var(--border)' },
+  leftGlow: { position: 'absolute', top: '30%', right: '20%', width: '400px', height: '400px', pointerEvents: 'none', background: 'radial-gradient(circle, rgba(124,106,191,0.12) 0%, transparent 65%)' },
   leftContent: { maxWidth: '380px', position: 'relative', zIndex: 1 },
   brand: { display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '2.5rem' },
-  brandIcon: { width: '36px', height: '36px', borderRadius: '10px', background: 'linear-gradient(135deg, var(--accent), var(--accent2))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 800, color: '#07071a', fontFamily: 'var(--font-display)' },
+  brandIcon: { width: '36px', height: '36px', borderRadius: '10px', background: 'linear-gradient(135deg, var(--accent), var(--accent2))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 800, color: '#fff', fontFamily: 'var(--font-display)' },
   brandText: { fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem', color: 'var(--text)' },
   leftTitle: { fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem, 3.5vw, 2.75rem)', fontWeight: 800, color: 'var(--text)', lineHeight: 1.15, marginBottom: '1rem' },
   leftSub: { fontSize: '1rem', color: 'var(--text2)', lineHeight: 1.7, marginBottom: '2rem' },
@@ -101,12 +95,12 @@ const s = {
   right: { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '3rem', background: 'var(--bg)' },
   card: { width: '100%', maxWidth: '400px' },
   successBox: { textAlign: 'center', padding: '1rem 0' },
-  successIcon: { width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(123,229,192,0.1)', border: '2px solid var(--success)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', fontSize: '1.5rem', color: 'var(--success)' },
+  successIcon: { width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(58,171,122,0.1)', border: '2px solid var(--success)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', fontSize: '1.5rem', color: 'var(--success)' },
   title: { fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 800, color: 'var(--text)', marginBottom: '0.5rem' },
   subtitle: { color: 'var(--text2)', fontSize: '0.9rem', marginBottom: '2rem' },
-  error: { background: 'rgba(245,122,139,0.1)', border: '1px solid rgba(245,122,139,0.3)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', color: 'var(--danger)', fontSize: '0.875rem', marginBottom: '1.5rem' },
+  error: { background: 'rgba(196,90,106,0.08)', border: '1px solid rgba(196,90,106,0.25)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', color: 'var(--danger)', fontSize: '0.875rem', marginBottom: '1.5rem' },
   field: { marginBottom: '1.25rem' },
   label: { display: 'block', fontSize: '0.875rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.5rem' },
-  input: { width: '100%', background: 'var(--surface)', border: '1.5px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.85rem 1rem', fontSize: '0.95rem', color: 'var(--text)', outline: 'none', boxSizing: 'border-box', transition: 'all 0.2s' },
-  btn: { display: 'block', width: '100%', background: 'linear-gradient(135deg, var(--accent), var(--accent2))', color: '#07071a', border: 'none', padding: '0.9rem', fontWeight: 700, fontSize: '1rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer', marginTop: '0.5rem', textAlign: 'center', boxSizing: 'border-box' },
+  input: { width: '100%', background: 'var(--surface)', border: '1.5px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.85rem 1rem', fontSize: '0.95rem', color: 'var(--text)', outline: 'none', boxSizing: 'border-box', transition: 'all 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' },
+  btn: { display: 'block', width: '100%', background: 'linear-gradient(135deg, var(--accent), var(--accent2))', color: '#fff', border: 'none', padding: '0.9rem', fontWeight: 700, fontSize: '1rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer', marginTop: '0.5rem', textAlign: 'center', boxSizing: 'border-box' },
 }

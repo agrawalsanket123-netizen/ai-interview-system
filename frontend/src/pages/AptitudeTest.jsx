@@ -122,11 +122,11 @@ const s = {
     color: 'var(--text)', fontSize: '0.9rem', textAlign: 'left',
     transition: 'all 0.2s', cursor: 'pointer',
   },
-  optionSelected: { border: '1.5px solid var(--accent)', background: 'rgba(139,167,245,0.08)', color: 'var(--text)' },
+  optionSelected: { border: '1.5px solid var(--accent)', background: 'rgba(91,106,191,0.08)', color: 'var(--text)' },
   optKey: { fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '0.9rem', minWidth: '1.25rem' },
   checkMark: { marginLeft: 'auto', color: 'var(--accent)', fontWeight: 700 },
   navRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
   navBtn: { background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text2)', padding: '0.75rem 1.5rem', fontSize: '0.85rem', borderRadius: 'var(--radius-sm)', transition: 'all 0.2s', cursor: 'pointer' },
   ansCount: { fontSize: '0.8rem', color: 'var(--text3)' },
-  submitBtn: { background: 'linear-gradient(135deg, var(--accent), var(--accent2))', color: '#07071a', border: 'none', padding: '0.75rem 2rem', fontWeight: 700, fontSize: '0.9rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer' },
+  submitBtn: { background: 'linear-gradient(135deg, var(--accent), var(--accent2))', color: '#fff', border: 'none', padding: '0.75rem 2rem', fontWeight: 700, fontSize: '0.9rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer' },
 }

@@ -107,7 +107,7 @@ export default function Interview() {
           <div style={s.counter}>Question {current + 1} / {questions.length}</div>
         </div>
         <div style={s.controls}>
-          <button style={{ ...s.voiceBtn, borderColor: voiceEnabled ? 'var(--accent)' : 'var(--border)', color: voiceEnabled ? 'var(--accent)' : 'var(--text3)', background: voiceEnabled ? 'rgba(139,167,245,0.08)' : 'transparent' }}
+          <button style={{ ...s.voiceBtn, borderColor: voiceEnabled ? 'var(--accent)' : 'var(--border)', color: voiceEnabled ? 'var(--accent)' : 'var(--text3)', background: voiceEnabled ? 'rgba(91,106,191,0.08)' : 'transparent' }}
             onClick={() => { if (voiceEnabled) stopSpeaking(); setVoiceEnabled(v => !v) }}>
             {voiceEnabled ? '🔊' : '🔇'}
           </button>
@@ -192,7 +192,7 @@ const s = {
   replayBtn: { border: '1px solid var(--border)', padding: '0.4rem 0.75rem', borderRadius: 'var(--radius-sm)', fontSize: '0.9rem', transition: 'all 0.2s', cursor: 'pointer', background: 'transparent' },
   dots: { display: 'flex', gap: '0.35rem' },
   dot: { width: '28px', height: '5px', borderRadius: '3px', transition: 'all 0.3s' },
-  speakBanner: { display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(139,167,245,0.06)', border: '1px solid rgba(139,167,245,0.2)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.8rem', color: 'var(--accent)', marginBottom: '1.25rem' },
+  speakBanner: { display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(91,106,191,0.06)', border: '1px solid rgba(91,106,191,0.2)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.8rem', color: 'var(--accent)', marginBottom: '1.25rem' },
   wave: { display: 'flex', alignItems: 'center', gap: '3px', height: '24px' },
   waveBar: { width: '3px', height: '4px', background: 'var(--accent)', borderRadius: '2px', animation: 'soundBar 0.5s ease-in-out infinite' },
   qCard: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '2.5rem', marginBottom: '2rem' },
@@ -206,7 +206,7 @@ const s = {
   pulse: { display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: 'var(--danger)', animation: 'pulse-dot 1s infinite' },
   navRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
   navBtn: { background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text2)', padding: '0.75rem 1.5rem', fontSize: '0.85rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer', transition: 'all 0.2s' },
-  submitBtn: { background: 'linear-gradient(135deg, var(--accent), var(--accent2))', color: '#07071a', border: 'none', padding: '0.75rem 2rem', fontWeight: 700, fontSize: '0.9rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer' },
-  evalBanner: { marginTop: '2rem', background: 'rgba(139,167,245,0.06)', border: '1px solid rgba(139,167,245,0.2)', borderRadius: 'var(--radius-sm)', padding: '1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.875rem', color: 'var(--accent)' },
-  spinner: { width: '18px', height: '18px', border: '2px solid rgba(139,167,245,0.3)', borderTopColor: 'var(--accent)', borderRadius: '50%', animation: 'spin 0.8s linear infinite', flexShrink: 0 },
+  submitBtn: { background: 'linear-gradient(135deg, var(--accent), var(--accent2))', color: '#fff', border: 'none', padding: '0.75rem 2rem', fontWeight: 700, fontSize: '0.9rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer' },
+  evalBanner: { marginTop: '2rem', background: 'rgba(91,106,191,0.06)', border: '1px solid rgba(91,106,191,0.2)', borderRadius: 'var(--radius-sm)', padding: '1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.875rem', color: 'var(--accent)' },
+  spinner: { width: '18px', height: '18px', border: '2px solid rgba(91,106,191,0.3)', borderTopColor: 'var(--accent)', borderRadius: '50%', animation: 'spin 0.8s linear infinite', flexShrink: 0 },
 }

@@ -57,7 +57,7 @@ const s = {
   nav: {
     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
     padding: '0.875rem 2.5rem',
-    background: 'rgba(7,7,26,0.8)',
+    background: 'rgba(250,247,242,0.85)',
     backdropFilter: 'blur(20px)',
     borderBottom: '1px solid var(--border)',
     position: 'sticky', top: 0, zIndex: 100,
@@ -78,13 +78,14 @@ const s = {
     borderRadius: 'var(--radius-sm)', transition: 'all 0.2s', fontWeight: 500,
     position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px',
   },
-  active: { color: 'var(--accent)', background: 'rgba(139,167,245,0.08)' },
+  active: { color: 'var(--accent)', background: 'rgba(91,106,191,0.08)' },
   activeDot: { width: '4px', height: '4px', borderRadius: '50%', background: 'var(--accent)' },
   auth: { display: 'flex', alignItems: 'center', gap: '0.75rem' },
   userChip: {
     display: 'flex', alignItems: 'center', gap: '0.5rem',
-    background: 'var(--surface2)', border: '1px solid var(--border)',
+    background: 'var(--surface)', border: '1px solid var(--border)',
     borderRadius: '100px', padding: '0.3rem 0.75rem 0.3rem 0.3rem',
+    boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
   },
   userAvatar: {
     width: '24px', height: '24px', borderRadius: '50%',
@@ -101,7 +102,7 @@ const s = {
   },
   loginBtn: { fontSize: '0.875rem', color: 'var(--text2)', padding: '0.4rem 1rem', borderRadius: 'var(--radius-sm)', fontWeight: 500 },
   registerBtn: {
-    fontSize: '0.875rem', color: '#07071a',
+    fontSize: '0.875rem', color: '#fff',
     background: 'linear-gradient(135deg, var(--accent), var(--accent2))',
     padding: '0.4rem 1.1rem', borderRadius: 'var(--radius-sm)', fontWeight: 700,
   },
