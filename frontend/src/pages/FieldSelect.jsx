@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { useScrollAnimation } from '../hooks/useScrollAnimation'
 
 const FIELDS = [
   { id: 'DataAnalysis', label: 'Data Analysis', desc: 'Pandas, NumPy, EDA, visualization, statistical methods', icon: '📊', color: 'rgba(167,212,245,0.1)', accent: 'var(--accent3)', border: 'rgba(167,212,245,0.3)' },
@@ -8,6 +9,7 @@ const FIELDS = [
 ]
 
 export default function FieldSelect() {
+  useScrollAnimation()
   const navigate = useNavigate()
   return (
     <main style={s.main} className="page-enter">
@@ -19,7 +21,7 @@ export default function FieldSelect() {
       <div style={s.grid}>
         {FIELDS.map((f, i) => (
           <button key={f.id} style={{ ...s.card, animationDelay: `${i * 0.08}s` }}
-            className={`card-hover stagger-${i + 1}`}
+            className={`card-hover scroll-animate scroll-delay-${i + 1}`}
             onClick={() => navigate(`/interview/${f.id}`)}
             onMouseEnter={e => { e.currentTarget.style.background = f.color; e.currentTarget.style.borderColor = f.border }}
             onMouseLeave={e => { e.currentTarget.style.background = 'var(--surface)'; e.currentTarget.style.borderColor = 'var(--border)' }}

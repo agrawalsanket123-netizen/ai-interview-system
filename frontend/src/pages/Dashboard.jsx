@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
+import { useScrollAnimation } from '../hooks/useScrollAnimation'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
 import BASE_URL from '../api'
 import { useAuth } from '../AuthContext'
 
 export default function Dashboard() {
+  useScrollAnimation()
   const { token, user } = useAuth()
   const [aptitude, setAptitude] = useState([])
   const [interview, setInterview] = useState([])
@@ -49,7 +51,7 @@ export default function Dashboard() {
       </div>
 
       {/* Stats row */}
-      <div style={s.statsRow} className="stagger-1">
+      <div style={s.statsRow} className="scroll-animate scroll-animate-scale scroll-delay-1">
         {[
           { label: 'Total Tests', val: totalTests, color: 'var(--accent)', bg: 'rgba(91,106,191,0.08)', border: 'rgba(91,106,191,0.2)' },
           { label: 'Aptitude Tests', val: aptitude.length, color: 'var(--accent3)', bg: 'rgba(167,212,245,0.08)', border: 'rgba(167,212,245,0.2)' },

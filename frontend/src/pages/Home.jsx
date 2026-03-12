@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../AuthContext'
 import { useState, useEffect } from 'react'
+import { useScrollAnimation } from '../hooks/useScrollAnimation'
 
 const FIELDS = [
   { id: 'DataAnalysis', label: 'Data Analysis', desc: 'EDA, visualization, statistics, pandas', icon: '📊', color: 'rgba(74,154,191,0.08)', accent: 'var(--accent3)', border: 'rgba(74,154,191,0.25)' },
@@ -11,10 +12,20 @@ const FIELDS = [
 
 const WORDS = ['Aptitude Tests', 'AI Scoring', 'Voice Interviews', 'Instant Feedback']
 
+const STEPS = [
+  { n: '01', title: 'Create Account', desc: 'Sign up free. Your results are saved privately and securely.', color: 'var(--accent)' },
+  { n: '02', title: 'Aptitude Test', desc: '10 randomized logic & reasoning questions with instant scoring.', color: 'var(--accent2)' },
+  { n: '03', title: 'Pick Your Field', desc: 'Choose from Data Analysis, Web Dev, ML, or Cyber Security.', color: 'var(--accent3)' },
+  { n: '04', title: 'Get AI Feedback', desc: 'Each answer scored 0–10 with detailed improvement suggestions.', color: 'var(--success)' },
+]
+
 export default function Home() {
   const { isLoggedIn } = useAuth()
   const [wordIdx, setWordIdx] = useState(0)
   const [visible, setVisible] = useState(true)
+
+  // Activate scroll animations after page mounts
+  useScrollAnimation()
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -27,9 +38,10 @@ export default function Home() {
   return (
     <main style={s.main} className="page-enter">
 
-      {/* Hero */}
+      {/* ── Hero ── */}
       <section style={s.hero}>
         <div style={s.heroGlow} />
+
         <div style={s.heroContent}>
           <div style={s.badge} className="stagger-1">
             <span style={s.badgeDot} />
@@ -62,6 +74,7 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Stats — scroll animate */}
         <div style={s.statsGrid}>
           {[
             { val: '40+', label: 'Questions', color: 'var(--accent)', bg: 'rgba(91,106,191,0.07)', border: 'rgba(91,106,191,0.18)' },
@@ -69,8 +82,9 @@ export default function Home() {
             { val: 'AI', label: 'Scoring', color: 'var(--accent3)', bg: 'rgba(74,154,191,0.07)', border: 'rgba(74,154,191,0.18)' },
             { val: '∞', label: 'Practice', color: 'var(--success)', bg: 'rgba(58,171,122,0.07)', border: 'rgba(58,171,122,0.18)' },
           ].map((st, i) => (
-            <div key={i} style={{ ...s.statCard, background: st.bg, border: `1px solid ${st.border}` }}
-              className={`stagger-${i + 1}`}>
+            <div key={i}
+              style={{ ...s.statCard, background: st.bg, border: `1px solid ${st.border}` }}
+              className={`scroll-animate scroll-animate-scale scroll-delay-${i + 1}`}>
               <div style={{ ...s.statVal, color: st.color }}>{st.val}</div>
               <div style={s.statLabel}>{st.label}</div>
             </div>
@@ -78,18 +92,15 @@ export default function Home() {
         </div>
       </section>
 
-      {/* How it works */}
+      {/* ── How it works ── */}
       <section style={s.section}>
-        <div style={s.sectionLabel}>How It Works</div>
-        <h2 style={s.sectionTitle}>Four steps to interview-ready</h2>
+        <div style={s.sectionLabel} className="scroll-animate">How It Works</div>
+        <h2 style={s.sectionTitle} className="scroll-animate scroll-delay-1">Four steps to interview-ready</h2>
         <div style={s.stepsGrid}>
-          {[
-            { n: '01', title: 'Create Account', desc: 'Sign up free. Your results are saved privately and securely.', color: 'var(--accent)', bg: '#fff' },
-            { n: '02', title: 'Aptitude Test', desc: '10 randomized logic & reasoning questions with instant scoring.', color: 'var(--accent2)', bg: '#fff' },
-            { n: '03', title: 'Pick Your Field', desc: 'Choose from Data Analysis, Web Dev, ML, or Cyber Security.', color: 'var(--accent3)', bg: '#fff' },
-            { n: '04', title: 'Get AI Feedback', desc: 'Each answer scored 0–10 with detailed improvement suggestions.', color: 'var(--success)', bg: '#fff' },
-          ].map((st, i) => (
-            <div key={i} style={{ ...s.stepCard, background: st.bg }} className="card-hover">
+          {STEPS.map((st, i) => (
+            <div key={i}
+              style={{ ...s.stepCard, background: '#fff' }}
+              className={`card-hover scroll-animate scroll-delay-${i + 1}`}>
               <div style={{ ...s.stepNum, color: st.color }}>{st.n}</div>
               <div style={s.stepTitle}>{st.title}</div>
               <div style={s.stepDesc}>{st.desc}</div>
@@ -98,15 +109,16 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Fields */}
+      {/* ── Fields ── */}
       <section style={s.section}>
-        <div style={s.sectionLabel}>Interview Fields</div>
-        <h2 style={s.sectionTitle}>Choose your domain</h2>
+        <div style={s.sectionLabel} className="scroll-animate">Interview Fields</div>
+        <h2 style={s.sectionTitle} className="scroll-animate scroll-delay-1">Choose your domain</h2>
         <div style={s.fieldsGrid}>
           {FIELDS.map((f, i) => (
-            <Link key={f.id} to={isLoggedIn ? `/interview/${f.id}` : '/login'}
+            <Link key={f.id}
+              to={isLoggedIn ? `/interview/${f.id}` : '/login'}
               style={s.fieldCard}
-              className="card-hover"
+              className={`card-hover scroll-animate scroll-delay-${i + 1}`}
               onMouseEnter={e => { e.currentTarget.style.background = f.color; e.currentTarget.style.borderColor = f.border }}
               onMouseLeave={e => { e.currentTarget.style.background = 'var(--surface)'; e.currentTarget.style.borderColor = 'var(--border)' }}
             >
@@ -119,8 +131,39 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── Why AI Interview? ── */}
+      <section style={s.whySection} className="scroll-animate">
+        <div style={s.whyInner}>
+          <div style={s.whyLeft} className="scroll-animate-left scroll-animate">
+            <div style={s.sectionLabel}>Why Use This?</div>
+            <h2 style={{ ...s.sectionTitle, marginBottom: '1rem' }}>Practice makes perfect</h2>
+            <p style={s.whyText}>Most candidates fail not because they don't know the material — but because they've never practiced answering technical questions out loud under pressure.</p>
+            <p style={{ ...s.whyText, marginTop: '0.75rem' }}>Our AI gives you honest, detailed feedback on every answer so you can improve before the real thing.</p>
+          </div>
+          <div style={s.whyRight}>
+            {[
+              { icon: '🎯', title: 'Targeted Practice', desc: 'Domain-specific questions for your exact field.' },
+              { icon: '🤖', title: 'AI Evaluation', desc: 'Every answer scored 0–10 with written feedback.' },
+              { icon: '🎤', title: 'Voice Support', desc: 'Answer by speaking, just like a real interview.' },
+              { icon: '📈', title: 'Track Progress', desc: 'Dashboard shows all your past attempts and scores.' },
+            ].map((item, i) => (
+              <div key={i}
+                style={s.whyCard}
+                className={`scroll-animate scroll-delay-${i + 1}`}>
+                <span style={s.whyIcon}>{item.icon}</span>
+                <div>
+                  <div style={s.whyCardTitle}>{item.title}</div>
+                  <div style={s.whyCardDesc}>{item.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA ── */}
       {!isLoggedIn && (
-        <section style={s.ctaSection}>
+        <section style={s.ctaSection} className="scroll-animate">
           <div style={s.ctaGlow} />
           <h2 style={s.ctaTitle}>Ready to level up?</h2>
           <p style={s.ctaSub}>Join and start practicing with AI feedback in minutes.</p>
@@ -133,6 +176,7 @@ export default function Home() {
 
 const s = {
   main: { maxWidth: '1100px', margin: '0 auto', padding: '0 2rem 6rem', position: 'relative', zIndex: 1 },
+
   hero: { padding: '5rem 0 4rem', borderBottom: '1px solid var(--border)', marginBottom: '5rem', position: 'relative' },
   heroGlow: { position: 'absolute', top: '0%', left: '40%', width: '600px', height: '300px', pointerEvents: 'none', background: 'radial-gradient(ellipse, rgba(91,106,191,0.07) 0%, transparent 70%)' },
   heroContent: { position: 'relative', zIndex: 1, maxWidth: '680px' },
@@ -144,8 +188,9 @@ const s = {
   rotatingWord: { background: 'rgba(91,106,191,0.1)', border: '1px solid rgba(91,106,191,0.25)', borderRadius: '6px', padding: '0.2rem 0.75rem', fontSize: '0.85rem', color: 'var(--accent)', fontWeight: 600, display: 'inline-block' },
   sub: { color: 'var(--text2)', fontSize: '1.05rem', lineHeight: 1.75, maxWidth: '520px', marginBottom: '2.5rem' },
   ctas: { display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '3.5rem' },
-  btnPrimary: { background: 'linear-gradient(135deg, var(--accent), var(--accent2))', color: '#fff', padding: '0.875rem 1.875rem', fontWeight: 700, fontSize: '0.95rem', borderRadius: 'var(--radius)', display: 'inline-block', letterSpacing: '0.01em' },
+  btnPrimary: { background: 'linear-gradient(135deg, var(--accent), var(--accent2))', color: '#fff', padding: '0.875rem 1.875rem', fontWeight: 700, fontSize: '0.95rem', borderRadius: 'var(--radius)', display: 'inline-block' },
   btnSecondary: { background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', padding: '0.875rem 1.875rem', fontWeight: 500, fontSize: '0.95rem', borderRadius: 'var(--radius)', display: 'inline-block', transition: 'all 0.2s', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' },
+
   statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', maxWidth: '600px' },
   statCard: { borderRadius: 'var(--radius)', padding: '1.25rem', textAlign: 'center', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' },
   statVal: { fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 800, lineHeight: 1 },
@@ -156,7 +201,7 @@ const s = {
   sectionTitle: { fontFamily: 'var(--font-display)', fontSize: 'clamp(1.6rem, 3.5vw, 2.25rem)', fontWeight: 700, color: 'var(--text)', marginBottom: '2rem' },
 
   stepsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' },
-  stepCard: { padding: '2rem 1.5rem', border: '1px solid var(--border)', borderRadius: 'var(--radius)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', transition: 'all 0.28s ease' },
+  stepCard: { padding: '2rem 1.5rem', border: '1px solid var(--border)', borderRadius: 'var(--radius)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
   stepNum: { fontFamily: 'var(--font-display)', fontSize: '2.75rem', fontWeight: 800, lineHeight: 1, marginBottom: '0.75rem', opacity: 0.75 },
   stepTitle: { fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem', color: 'var(--text)', marginBottom: '0.5rem' },
   stepDesc: { fontSize: '0.82rem', color: 'var(--text2)', lineHeight: 1.65 },
@@ -167,6 +212,16 @@ const s = {
   fieldName: { fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem', color: 'var(--text)', marginBottom: '0.4rem' },
   fieldDesc: { fontSize: '0.8rem', color: 'var(--text2)', lineHeight: 1.6, marginBottom: '1.25rem' },
   fieldArrow: { fontSize: '0.875rem', fontWeight: 700 },
+
+  whySection: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '3.5rem', marginBottom: '5rem', boxShadow: '0 4px 20px rgba(0,0,0,0.04)' },
+  whyInner: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem', alignItems: 'start' },
+  whyLeft: {},
+  whyText: { color: 'var(--text2)', fontSize: '0.95rem', lineHeight: 1.75 },
+  whyRight: { display: 'flex', flexDirection: 'column', gap: '1rem' },
+  whyCard: { display: 'flex', alignItems: 'flex-start', gap: '1rem', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '1rem 1.25rem' },
+  whyIcon: { fontSize: '1.25rem', flexShrink: 0, marginTop: '0.1rem' },
+  whyCardTitle: { fontWeight: 700, fontSize: '0.9rem', color: 'var(--text)', marginBottom: '0.2rem' },
+  whyCardDesc: { fontSize: '0.8rem', color: 'var(--text2)', lineHeight: 1.55 },
 
   ctaSection: { background: 'linear-gradient(135deg, rgba(91,106,191,0.06) 0%, rgba(124,106,191,0.06) 100%)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '4rem 3rem', textAlign: 'center', position: 'relative', overflow: 'hidden', boxShadow: '0 4px 20px rgba(91,106,191,0.08)' },
   ctaGlow: { position: 'absolute', top: '-40%', left: '50%', transform: 'translateX(-50%)', width: '400px', height: '300px', pointerEvents: 'none', background: 'radial-gradient(ellipse, rgba(91,106,191,0.08) 0%, transparent 70%)' },
