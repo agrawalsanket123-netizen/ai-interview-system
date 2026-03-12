@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
 import BASE_URL from '../api'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 export default function Register() {
   const [fullName, setFullName] = useState('')
@@ -10,6 +11,7 @@ export default function Register() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
+  const isMobile = useIsMobile()
 
   const handleRegister = async () => {
     if (!fullName || !email || !password) { setError('Please fill in all fields'); return }
@@ -23,28 +25,36 @@ export default function Register() {
   }
 
   return (
-    <div style={s.page} className="page-enter">
-      <div style={s.left}>
-        <div style={s.leftGlow} />
-        <div style={s.leftContent}>
-          <div style={s.brand}>
-            <div style={s.brandIcon}>AI</div>
-            <span style={s.brandText}>Interview System</span>
-          </div>
-          <h2 style={s.leftTitle}>Start your prep<br />journey today.</h2>
-          <p style={s.leftSub}>AI-powered interviews across 4 technical domains. Free forever.</p>
-          <div style={s.statsRow}>
-            {[['40+', 'Questions'], ['4', 'Domains'], ['AI', 'Scoring']].map(([v, l]) => (
-              <div key={l} style={s.statItem}>
-                <div style={s.statVal}>{v}</div>
-                <div style={s.statLabel}>{l}</div>
-              </div>
-            ))}
+    <div style={{ ...s.page, flexDirection: isMobile ? 'column' : 'row' }} className="page-enter">
+      {!isMobile && (
+        <div style={s.left}>
+          <div style={s.leftGlow} />
+          <div style={s.leftContent}>
+            <div style={s.brand}>
+              <div style={s.brandIcon}>AI</div>
+              <span style={s.brandText}>Interview System</span>
+            </div>
+            <h2 style={s.leftTitle}>Start your prep<br />journey today.</h2>
+            <p style={s.leftSub}>AI-powered interviews across 4 technical domains. Free forever.</p>
+            <div style={s.statsRow}>
+              {[['40+', 'Questions'], ['4', 'Domains'], ['AI', 'Scoring']].map(([v, l]) => (
+                <div key={l} style={s.statItem}>
+                  <div style={s.statVal}>{v}</div>
+                  <div style={s.statLabel}>{l}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
-      <div style={s.right}>
+      )}
+      <div style={{ ...s.right, padding: isMobile ? '2.5rem 1.5rem' : '3rem' }}>
         <div style={s.card}>
+          {isMobile && (
+            <div style={s.mobileBrand}>
+              <div style={s.brandIcon}>AI</div>
+              <span style={s.brandText}>Interview System</span>
+            </div>
+          )}
           {success ? (
             <div style={s.successBox}>
               <div style={s.successIcon}>✓</div>
@@ -84,6 +94,7 @@ const s = {
   leftGlow: { position: 'absolute', top: '30%', right: '20%', width: '400px', height: '400px', pointerEvents: 'none', background: 'radial-gradient(circle, rgba(124,106,191,0.12) 0%, transparent 65%)' },
   leftContent: { maxWidth: '380px', position: 'relative', zIndex: 1 },
   brand: { display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '2.5rem' },
+  mobileBrand: { display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.75rem' },
   brandIcon: { width: '36px', height: '36px', borderRadius: '10px', background: 'linear-gradient(135deg, var(--accent), var(--accent2))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 800, color: '#fff', fontFamily: 'var(--font-display)' },
   brandText: { fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem', color: 'var(--text)' },
   leftTitle: { fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem, 3.5vw, 2.75rem)', fontWeight: 800, color: 'var(--text)', lineHeight: 1.15, marginBottom: '1rem' },
@@ -92,7 +103,7 @@ const s = {
   statItem: { textAlign: 'center' },
   statVal: { fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 800, background: 'linear-gradient(135deg, var(--accent), var(--accent2))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' },
   statLabel: { fontSize: '0.75rem', color: 'var(--text2)', marginTop: '0.2rem' },
-  right: { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '3rem', background: 'var(--bg)' },
+  right: { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)' },
   card: { width: '100%', maxWidth: '400px' },
   successBox: { textAlign: 'center', padding: '1rem 0' },
   successIcon: { width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(58,171,122,0.1)', border: '2px solid var(--success)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', fontSize: '1.5rem', color: 'var(--success)' },

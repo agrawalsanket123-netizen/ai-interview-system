@@ -212,3 +212,158 @@ input:focus, textarea:focus {
 .scroll-delay-4 { transition-delay: 0.26s !important; }
 .scroll-delay-5 { transition-delay: 0.33s !important; }
 .scroll-delay-6 { transition-delay: 0.40s !important; }
+
+/* ============================================
+   MOBILE RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+
+  /* Navbar */
+  nav {
+    padding: 0.75rem 1.25rem !important;
+  }
+
+  /* Auth pages - stack vertically */
+  .auth-split {
+    flex-direction: column !important;
+  }
+  .auth-left {
+    display: none !important;
+  }
+  .auth-right {
+    padding: 2rem 1.5rem !important;
+    min-height: 100vh;
+  }
+
+  /* Home hero */
+  .hero-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    max-width: 100% !important;
+  }
+
+  /* Why section - stack */
+  .why-inner {
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+  }
+
+  /* CTA section */
+  .cta-section {
+    padding: 2.5rem 1.5rem !important;
+  }
+
+  /* General page padding */
+  .page-main {
+    padding-left: 1.25rem !important;
+    padding-right: 1.25rem !important;
+  }
+
+  /* Score cards - stack */
+  .score-card {
+    flex-direction: column !important;
+    gap: 1rem !important;
+  }
+
+  /* Nav row in aptitude/interview */
+  .nav-row {
+    flex-wrap: wrap !important;
+    gap: 0.75rem !important;
+  }
+
+  /* Dashboard stats */
+  .dash-stats {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Result row */
+  .result-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+  .result-row-right {
+    width: 100% !important;
+    min-width: unset !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .dash-stats {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* Show only on mobile */
+.show-mobile { display: none !important; }
+
+@media (max-width: 768px) {
+  .show-mobile { display: flex !important; }
+  .hide-mobile { display: none !important; }
+
+  /* Hamburger nav fix */
+  nav {
+    position: relative !important;
+    padding: 0.875rem 1.25rem !important;
+  }
+}
+
+/* ============================================
+   COMPONENT-LEVEL MOBILE FIXES
+   ============================================ */
+@media (max-width: 768px) {
+
+  /* Home page */
+  .stats-grid-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+    max-width: 100% !important;
+  }
+  .why-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+  }
+  .cta-pad {
+    padding: 2.5rem 1.5rem !important;
+  }
+  .page-pad {
+    padding-left: 1.25rem !important;
+    padding-right: 1.25rem !important;
+  }
+
+  /* Score cards */
+  .score-flex {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  /* Nav row */
+  .nav-row-flex {
+    flex-wrap: wrap !important;
+    gap: 0.75rem !important;
+  }
+
+  /* Dashboard stats */
+  .stats-grid-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Interview controls */
+  .interview-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+  }
+
+  /* Result row */
+  .result-row-flex {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+  }
+  .result-row-right {
+    width: 100% !important;
+    min-width: unset !important;
+  }
+}

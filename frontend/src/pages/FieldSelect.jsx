@@ -12,7 +12,7 @@ export default function FieldSelect() {
   useScrollAnimation()
   const navigate = useNavigate()
   return (
-    <main style={s.main} className="page-enter">
+    <main style={s.main} className="page-enter page-pad">
       <div style={s.header}>
         <div style={s.tag}>Technical Interview</div>
         <h2 style={s.title}>Choose your field</h2>

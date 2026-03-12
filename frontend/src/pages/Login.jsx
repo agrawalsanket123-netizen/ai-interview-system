@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import BASE_URL from '../api'
 import { useAuth } from '../AuthContext'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -11,6 +12,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
+  const isMobile = useIsMobile()
 
   const handleLogin = async () => {
     if (!email || !password) { setError('Please fill in all fields'); return }
@@ -24,25 +26,33 @@ export default function Login() {
   }
 
   return (
-    <div style={s.page} className="page-enter">
-      <div style={s.left}>
-        <div style={s.leftGlow} />
-        <div style={s.leftContent}>
-          <div style={s.brand}>
-            <div style={s.brandIcon}>AI</div>
-            <span style={s.brandText}>Interview System</span>
-          </div>
-          <h2 style={s.leftTitle}>Welcome back.</h2>
-          <p style={s.leftSub}>Continue your interview prep and track your progress.</p>
-          <div style={s.featureList}>
-            {['AI-scored answers', 'Voice input support', '4 tech domains', 'Private dashboard'].map(f => (
-              <div key={f} style={s.featureItem}><span style={s.featureCheck}>✦</span> {f}</div>
-            ))}
+    <div style={{ ...s.page, flexDirection: isMobile ? 'column' : 'row' }} className="page-enter">
+      {!isMobile && (
+        <div style={s.left}>
+          <div style={s.leftGlow} />
+          <div style={s.leftContent}>
+            <div style={s.brand}>
+              <div style={s.brandIcon}>AI</div>
+              <span style={s.brandText}>Interview System</span>
+            </div>
+            <h2 style={s.leftTitle}>Welcome back.</h2>
+            <p style={s.leftSub}>Continue your interview prep and track your progress.</p>
+            <div style={s.featureList}>
+              {['AI-scored answers', 'Voice input support', '4 tech domains', 'Private dashboard'].map(f => (
+                <div key={f} style={s.featureItem}><span style={s.featureCheck}>✦</span> {f}</div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
-      <div style={s.right}>
+      )}
+      <div style={{ ...s.right, padding: isMobile ? '2.5rem 1.5rem' : '3rem' }}>
         <div style={s.card}>
+          {isMobile && (
+            <div style={s.mobileBrand}>
+              <div style={s.brandIcon}>AI</div>
+              <span style={s.brandText}>Interview System</span>
+            </div>
+          )}
           <h1 style={s.title}>Sign in</h1>
           <p style={s.subtitle}>Don't have an account? <Link to="/register" style={{ color: 'var(--accent)', fontWeight: 600 }}>Sign up free</Link></p>
           {error && <div style={s.error}>{error}</div>}
@@ -69,6 +79,7 @@ const s = {
   leftGlow: { position: 'absolute', top: '20%', left: '30%', width: '400px', height: '400px', pointerEvents: 'none', background: 'radial-gradient(circle, rgba(91,106,191,0.12) 0%, transparent 65%)' },
   leftContent: { maxWidth: '380px', position: 'relative', zIndex: 1 },
   brand: { display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '2.5rem' },
+  mobileBrand: { display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.75rem' },
   brandIcon: { width: '36px', height: '36px', borderRadius: '10px', background: 'linear-gradient(135deg, var(--accent), var(--accent2))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 800, color: '#fff', fontFamily: 'var(--font-display)' },
   brandText: { fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem', color: 'var(--text)' },
   leftTitle: { fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 800, color: 'var(--text)', lineHeight: 1.15, marginBottom: '1rem' },
@@ -76,7 +87,7 @@ const s = {
   featureList: { display: 'flex', flexDirection: 'column', gap: '0.6rem' },
   featureItem: { fontSize: '0.875rem', color: 'var(--text2)', display: 'flex', alignItems: 'center', gap: '0.5rem' },
   featureCheck: { color: 'var(--accent)', fontSize: '0.7rem' },
-  right: { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '3rem', background: 'var(--bg)' },
+  right: { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)' },
   card: { width: '100%', maxWidth: '400px' },
   title: { fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 800, color: 'var(--text)', marginBottom: '0.5rem' },
   subtitle: { color: 'var(--text2)', fontSize: '0.9rem', marginBottom: '2rem' },

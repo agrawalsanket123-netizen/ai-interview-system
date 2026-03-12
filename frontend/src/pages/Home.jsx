@@ -36,7 +36,7 @@ export default function Home() {
   }, [])
 
   return (
-    <main style={s.main} className="page-enter">
+    <main style={s.main} className="page-enter page-pad">
 
       {/* ── Hero ── */}
       <section style={s.hero}>
@@ -133,7 +133,7 @@ export default function Home() {
 
       {/* ── Why AI Interview? ── */}
       <section style={s.whySection} className="scroll-animate">
-        <div style={s.whyInner}>
+        <div style={s.whyInner} className="why-grid">
           <div style={s.whyLeft} className="scroll-animate-left scroll-animate">
             <div style={s.sectionLabel}>Why Use This?</div>
             <h2 style={{ ...s.sectionTitle, marginBottom: '1rem' }}>Practice makes perfect</h2>
@@ -163,7 +163,7 @@ export default function Home() {
 
       {/* ── CTA ── */}
       {!isLoggedIn && (
-        <section style={s.ctaSection} className="scroll-animate">
+        <section style={s.ctaSection} className="scroll-animate cta-pad">
           <div style={s.ctaGlow} />
           <h2 style={s.ctaTitle}>Ready to level up?</h2>
           <p style={s.ctaSub}>Join and start practicing with AI feedback in minutes.</p>

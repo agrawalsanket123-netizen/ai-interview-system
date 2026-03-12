@@ -13,7 +13,7 @@ export default function AptitudeResult() {
   const scoreColor = passed ? 'var(--success)' : 'var(--danger)'
 
   return (
-    <main style={s.main} className="page-enter">
+    <main style={s.main} className="page-enter page-pad">
       <div style={s.header} className="scroll-animate">
         <div style={s.tag}>Aptitude Test · Results</div>
         <div style={{ ...s.verdict, background: passed ? 'rgba(58,171,122,0.1)' : 'rgba(196,90,106,0.1)', color: scoreColor, border: `1px solid ${passed ? 'rgba(58,171,122,0.3)' : 'rgba(196,90,106,0.3)'}` }}>
@@ -21,7 +21,7 @@ export default function AptitudeResult() {
         </div>
       </div>
 
-      <div style={s.scoreCard} className="scroll-animate">
+      <div style={s.scoreCard} className="scroll-animate score-flex">
         <div style={s.scoreLeft}>
           <div style={{ ...s.bigScore, color: scoreColor }}>{score}</div>
           <div style={s.scoreOut}>/ {total}</div>
@@ -50,7 +50,7 @@ export default function AptitudeResult() {
         </div>
       ))}
 
-      <div style={s.actions} className="scroll-animate">
+      <div style={s.actions} className="scroll-animate nav-row-flex">
         <Link to="/interview" style={s.btnPrimary} className="btn-glow">Proceed to Interview →</Link>
         <Link to="/aptitude" style={s.btnSecondary}>Retake Test</Link>
       </div>

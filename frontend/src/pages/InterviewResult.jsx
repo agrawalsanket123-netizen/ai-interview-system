@@ -12,7 +12,7 @@ export default function InterviewResult() {
   const scoreColor = overall_score >= 7 ? 'var(--success)' : overall_score >= 5 ? 'var(--warning)' : 'var(--danger)'
 
   return (
-    <main style={s.main} className="page-enter">
+    <main style={s.main} className="page-enter page-pad">
       <div style={s.header} className="scroll-animate">
         <div>
           <div style={s.tag}>{field.replace(/([A-Z])/g, ' $1').trim()} · Interview Results</div>
@@ -23,7 +23,7 @@ export default function InterviewResult() {
         </div>
       </div>
 
-      <div style={s.scoreCard} className="scroll-animate">
+      <div style={s.scoreCard} className="scroll-animate score-flex">
         <div style={s.scoreLeft}>
           <div style={{ ...s.bigScore, color: scoreColor }}>{overall_score}</div>
           <div style={s.scoreOut}>/ 10</div>
@@ -64,7 +64,7 @@ export default function InterviewResult() {
         )
       })}
 
-      <div style={s.actions} className="scroll-animate">
+      <div style={s.actions} className="scroll-animate nav-row-flex">
         <Link to="/interview" style={s.btnPrimary} className="btn-glow">Try Another Field →</Link>
         <Link to="/dashboard" style={s.btnSecondary}>View Dashboard</Link>
         <Link to="/" style={s.btnSecondary}>Home</Link>

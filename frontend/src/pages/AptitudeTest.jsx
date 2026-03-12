@@ -35,7 +35,7 @@ export default function AptitudeTest() {
   const answered = Object.keys(answers).length
 
   return (
-    <main style={s.main} className="page-enter">
+    <main style={s.main} className="page-enter page-pad">
       {/* Top progress bar */}
       <div style={s.topBar}>
         <div style={{ ...s.topBarFill, width: `${(answered / questions.length) * 100}%` }} />
@@ -74,7 +74,7 @@ export default function AptitudeTest() {
         </div>
       </div>
 
-      <div style={s.navRow}>
+      <div style={s.navRow} className="nav-row-flex">
         <button style={{ ...s.navBtn, opacity: current === 0 ? 0.3 : 1 }}
           onClick={() => setCurrent(c => Math.max(0, c - 1))} disabled={current === 0}>
           ← Prev

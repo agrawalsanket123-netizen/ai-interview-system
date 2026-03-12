@@ -35,7 +35,7 @@ export default function Dashboard() {
   const totalTests = aptitude.length + interview.length
 
   return (
-    <main style={s.main} className="page-enter">
+    <main style={s.main} className="page-enter page-pad">
       {/* Header */}
       <div style={s.header}>
         <div>
@@ -51,7 +51,7 @@ export default function Dashboard() {
       </div>
 
       {/* Stats row */}
-      <div style={s.statsRow} className="scroll-animate scroll-animate-scale scroll-delay-1">
+      <div style={s.statsRow} className="scroll-animate scroll-animate-scale scroll-delay-1 stats-grid-4">
         {[
           { label: 'Total Tests', val: totalTests, color: 'var(--accent)', bg: 'rgba(91,106,191,0.08)', border: 'rgba(91,106,191,0.2)' },
           { label: 'Aptitude Tests', val: aptitude.length, color: 'var(--accent3)', bg: 'rgba(167,212,245,0.08)', border: 'rgba(167,212,245,0.2)' },
@@ -79,7 +79,7 @@ export default function Dashboard() {
             const passed = pct >= 60
             const c = passed ? 'var(--success)' : 'var(--danger)'
             return (
-              <div key={i} style={s.resultRow} className="card-hover">
+              <div key={i} style={s.resultRow} className="card-hover result-row-flex">
                 <div style={s.rowLeft}>
                   <div style={{ ...s.rowBadge, background: passed ? 'rgba(123,229,192,0.1)' : 'rgba(245,122,139,0.1)', color: c, border: `1px solid ${c}44` }}>
                     {passed ? '✓ Pass' : '✗ Fail'}
@@ -89,7 +89,7 @@ export default function Dashboard() {
                     <div style={s.rowDate}>{new Date(r.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
                   </div>
                 </div>
-                <div style={s.rowRight}>
+                <div style={s.rowRight} className="result-row-right">
                   <div style={s.scoreBar}>
                     <div style={{ ...s.scoreFill, width: `${pct}%`, background: `linear-gradient(90deg, ${c}, var(--accent))` }} />
                   </div>
@@ -116,7 +116,7 @@ export default function Dashboard() {
             const verdict = sc >= 7 ? 'Excellent' : sc >= 5 ? 'Good' : 'Needs Practice'
             const field = (r.field || 'Unknown').replace(/([A-Z])/g, ' $1').trim()
             return (
-              <div key={i} style={s.resultRow} className="card-hover">
+              <div key={i} style={s.resultRow} className="card-hover result-row-flex">
                 <div style={s.rowLeft}>
                   <div style={{ ...s.rowBadge, background: `${c}18`, color: c, border: `1px solid ${c}44` }}>
                     {verdict}
@@ -126,7 +126,7 @@ export default function Dashboard() {
                     <div style={s.rowDate}>{new Date(r.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
                   </div>
                 </div>
-                <div style={s.rowRight}>
+                <div style={s.rowRight} className="result-row-right">
                   <div style={s.scoreBar}>
                     <div style={{ ...s.scoreFill, width: `${(sc / 10) * 100}%`, background: `linear-gradient(90deg, ${c}, var(--accent))` }} />
                   </div>

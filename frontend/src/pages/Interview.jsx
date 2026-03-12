@@ -96,12 +96,12 @@ export default function Interview() {
   const allAnswered = questions.every((_, i) => answers[i]?.trim())
 
   return (
-    <main style={s.main} className="page-enter">
+    <main style={s.main} className="page-enter page-pad">
       <div style={s.topBar}>
         <div style={{ ...s.topFill, width: `${((Object.keys(answers).length) / questions.length) * 100}%` }} />
       </div>
 
-      <div style={s.header}>
+      <div style={s.header} className="interview-header">
         <div>
           <div style={s.fieldTag}>{field.replace(/([A-Z])/g, ' $1').trim()} Interview</div>
           <div style={s.counter}>Question {current + 1} / {questions.length}</div>
@@ -157,7 +157,7 @@ export default function Interview() {
         )}
       </div>
 
-      <div style={s.navRow}>
+      <div style={s.navRow} className="nav-row-flex">
         <button style={{ ...s.navBtn, opacity: current === 0 ? 0.3 : 1 }} onClick={() => goTo(Math.max(0, current - 1))} disabled={current === 0}>← Prev</button>
         <div style={{ display: 'flex', gap: '0.75rem' }}>
           {current < questions.length - 1 && <button style={s.navBtn} onClick={() => goTo(current + 1)}>Next →</button>}
