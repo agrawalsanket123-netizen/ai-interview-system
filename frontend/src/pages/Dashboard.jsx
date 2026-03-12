@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import axios from 'axios'
 import BASE_URL from '../api'
 import { useAuth } from '../AuthContext'
 
 export default function Dashboard() {
-  const { token } = useAuth()
+  const { token, user } = useAuth()
   const [aptitude, setAptitude] = useState([])
   const [interview, setInterview] = useState([])
   const [loading, setLoading] = useState(true)
-  const [tab, setTab] = useState('interview')
 
   useEffect(() => {
     Promise.all([
@@ -22,179 +22,155 @@ export default function Dashboard() {
   }, [])
 
   if (loading) return (
-    <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem', color: 'var(--text2)' }}>
-      Loading results...
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', flexDirection: 'column', gap: '1rem' }}>
+      <div style={{ width: '32px', height: '32px', border: '3px solid var(--border2)', borderTopColor: 'var(--accent)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <div style={{ color: 'var(--text2)', fontSize: '0.875rem' }}>Loading your results...</div>
     </div>
   )
 
-  const formatDate = (iso) => {
-    if (!iso) return '—'
-    return new Date(iso).toLocaleString()
-  }
-
-  const avgAptitude = aptitude.length > 0
-    ? Math.round((aptitude.reduce((s, a) => s + (a.score / a.total) * 100, 0) / aptitude.length))
-    : null
-
-  const avgInterview = interview.length > 0
-    ? (interview.reduce((s, r) => s + (r.overall_score || 0), 0) / interview.length).toFixed(1)
-    : null
+  const bestApt = aptitude.length ? Math.max(...aptitude.map(r => Math.round((r.score / r.total) * 100))) : null
+  const bestInt = interview.length ? Math.max(...interview.map(r => r.overall_score)) : null
+  const totalTests = aptitude.length + interview.length
 
   return (
-    <main style={styles.main}>
-      <div style={styles.pageHeader}>
-        <div style={styles.label}>Results Dashboard</div>
-        <h2 style={styles.h2}>Your History</h2>
-      </div>
-
-      {/* Stats */}
-      <div style={styles.stats}>
-        <div style={styles.statCard}>
-          <div style={styles.statNum}>{aptitude.length}</div>
-          <div style={styles.statLabel}>Aptitude Tests</div>
+    <main style={s.main} className="page-enter">
+      {/* Header */}
+      <div style={s.header}>
+        <div>
+          <div style={s.tag}>Dashboard</div>
+          <h1 style={s.title}>
+            {user?.full_name ? `Welcome back, ${user.full_name.split(' ')[0]}!` : 'Your Results'}
+          </h1>
         </div>
-        <div style={styles.statCard}>
-          <div style={styles.statNum}>{interview.length}</div>
-          <div style={styles.statLabel}>Interviews Done</div>
-        </div>
-        <div style={styles.statCard}>
-          <div style={styles.statNum}>{avgAptitude !== null ? avgAptitude + '%' : '—'}</div>
-          <div style={styles.statLabel}>Avg Aptitude Score</div>
-        </div>
-        <div style={styles.statCard}>
-          <div style={styles.statNum}>{avgInterview !== null ? avgInterview + '/10' : '—'}</div>
-          <div style={styles.statLabel}>Avg Interview Score</div>
+        <div style={s.btnGroup}>
+          <Link to="/aptitude" style={s.btnSecondary}>Take Aptitude Test</Link>
+          <Link to="/interview" style={s.btnPrimary} className="btn-glow">Start Interview →</Link>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div style={styles.tabs}>
-        {['interview', 'aptitude'].map(t => (
-          <button
-            key={t}
-            style={{ ...styles.tab, ...(tab === t ? styles.tabActive : {}) }}
-            onClick={() => setTab(t)}
-          >
-            {t.charAt(0).toUpperCase() + t.slice(1)} Results
-          </button>
+      {/* Stats row */}
+      <div style={s.statsRow} className="stagger-1">
+        {[
+          { label: 'Total Tests', val: totalTests, color: 'var(--accent)', bg: 'rgba(139,167,245,0.08)', border: 'rgba(139,167,245,0.2)' },
+          { label: 'Aptitude Tests', val: aptitude.length, color: 'var(--accent3)', bg: 'rgba(167,212,245,0.08)', border: 'rgba(167,212,245,0.2)' },
+          { label: 'Best Aptitude', val: bestApt !== null ? `${bestApt}%` : '—', color: 'var(--success)', bg: 'rgba(123,229,192,0.08)', border: 'rgba(123,229,192,0.2)' },
+          { label: 'Best Interview', val: bestInt !== null ? `${bestInt}/10` : '—', color: 'var(--accent2)', bg: 'rgba(184,167,245,0.08)', border: 'rgba(184,167,245,0.2)' },
+        ].map((st, i) => (
+          <div key={i} style={{ ...s.statCard, background: st.bg, border: `1px solid ${st.border}` }}>
+            <div style={{ ...s.statVal, color: st.color }}>{st.val}</div>
+            <div style={s.statLabel}>{st.label}</div>
+          </div>
         ))}
       </div>
 
-      {/* Interview Tab */}
-      {tab === 'interview' && (
-        <div>
-          {interview.length === 0 ? (
-            <Empty label="No interview results yet." />
-          ) : interview.map((r, i) => {
-            const score = r.overall_score || 0
-            const color = score >= 7 ? 'var(--accent)' : score >= 5 ? '#ffd166' : 'var(--accent3)'
-            const responses = Array.isArray(r.responses) ? r.responses : []
+      {/* Aptitude Results */}
+      <div style={s.section}>
+        <div style={s.sectionHeader}>
+          <div style={s.sectionTitle}>Aptitude Tests</div>
+          <span style={s.count}>{aptitude.length} attempt{aptitude.length !== 1 ? 's' : ''}</span>
+        </div>
+        {aptitude.length === 0 ? (
+          <EmptyState text="No aptitude tests taken yet." link="/aptitude" linkText="Take your first test →" />
+        ) : (
+          aptitude.slice().reverse().map((r, i) => {
+            const pct = Math.round((r.score / r.total) * 100)
+            const passed = pct >= 60
+            const c = passed ? 'var(--success)' : 'var(--danger)'
             return (
-              <div key={i} style={styles.sessionCard}>
-                <div style={styles.sessionHeader}>
-                  <div>
-                    <div style={{ ...styles.fieldTag, color }}>
-                      {r.field?.replace(/([A-Z])/g, ' $1').trim()}
-                    </div>
-                    <div style={styles.ts}>{formatDate(r.created_at)}</div>
+              <div key={i} style={s.resultRow} className="card-hover">
+                <div style={s.rowLeft}>
+                  <div style={{ ...s.rowBadge, background: passed ? 'rgba(123,229,192,0.1)' : 'rgba(245,122,139,0.1)', color: c, border: `1px solid ${c}44` }}>
+                    {passed ? '✓ Pass' : '✗ Fail'}
                   </div>
-                  <div style={{ ...styles.sessionScore, color }}>{score}/10</div>
+                  <div>
+                    <div style={s.rowTitle}>Aptitude Test</div>
+                    <div style={s.rowDate}>{new Date(r.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+                  </div>
                 </div>
-                {responses.map((item, j) => {
-                  const itemScore = item.score || 0
-                  const itemColor = itemScore >= 7 ? 'var(--accent)' : itemScore >= 5 ? '#ffd166' : 'var(--accent3)'
-                  return (
-                    <div key={j} style={styles.itemRow}>
-                      <div style={styles.itemQ}>{item.question}</div>
-                      <div style={styles.itemMeta}>
-                        <span style={{ color: 'var(--text2)', fontSize: '0.75rem' }}>Score: </span>
-                        <strong style={{ color: itemColor, fontSize: '0.8rem' }}>{itemScore}/10</strong>
-                        <span style={{ color: 'var(--text2)', fontSize: '0.75rem', marginLeft: '0.75rem' }}>
-                          {item.feedback}
-                        </span>
-                      </div>
-                    </div>
-                  )
-                })}
+                <div style={s.rowRight}>
+                  <div style={s.scoreBar}>
+                    <div style={{ ...s.scoreFill, width: `${pct}%`, background: `linear-gradient(90deg, ${c}, var(--accent))` }} />
+                  </div>
+                  <div style={{ ...s.scoreText, color: c }}>{r.score}/{r.total} · {pct}%</div>
+                </div>
               </div>
             )
-          })}
-        </div>
-      )}
+          })
+        )}
+      </div>
 
-      {/* Aptitude Tab */}
-      {tab === 'aptitude' && (
-        <div>
-          {aptitude.length === 0 ? (
-            <Empty label="No aptitude test results yet." />
-          ) : (
-            <table style={styles.table}>
-              <thead>
-                <tr>
-                  {['Date', 'Score', 'Out of', 'Percentage'].map(h => (
-                    <th key={h} style={styles.th}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {aptitude.map((r, i) => {
-                  const pct = Math.round((r.score / r.total) * 100)
-                  return (
-                    <tr key={i} style={styles.tr}>
-                      <td style={styles.td}>{formatDate(r.created_at)}</td>
-                      <td style={styles.td}>{r.score}</td>
-                      <td style={styles.td}>{r.total}</td>
-                      <td style={styles.td}>
-                        <span style={{ color: pct >= 60 ? 'var(--accent)' : 'var(--accent3)', fontWeight: 700 }}>
-                          {pct}%
-                        </span>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          )}
+      {/* Interview Results */}
+      <div style={s.section}>
+        <div style={s.sectionHeader}>
+          <div style={s.sectionTitle}>Interview Results</div>
+          <span style={s.count}>{interview.length} attempt{interview.length !== 1 ? 's' : ''}</span>
         </div>
-      )}
+        {interview.length === 0 ? (
+          <EmptyState text="No interviews taken yet." link="/interview" linkText="Start your first interview →" />
+        ) : (
+          interview.slice().reverse().map((r, i) => {
+            const sc = r.overall_score
+            const c = sc >= 7 ? 'var(--success)' : sc >= 5 ? 'var(--warning)' : 'var(--danger)'
+            const verdict = sc >= 7 ? 'Excellent' : sc >= 5 ? 'Good' : 'Needs Practice'
+            const field = (r.field || 'Unknown').replace(/([A-Z])/g, ' $1').trim()
+            return (
+              <div key={i} style={s.resultRow} className="card-hover">
+                <div style={s.rowLeft}>
+                  <div style={{ ...s.rowBadge, background: `${c}18`, color: c, border: `1px solid ${c}44` }}>
+                    {verdict}
+                  </div>
+                  <div>
+                    <div style={s.rowTitle}>{field}</div>
+                    <div style={s.rowDate}>{new Date(r.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+                  </div>
+                </div>
+                <div style={s.rowRight}>
+                  <div style={s.scoreBar}>
+                    <div style={{ ...s.scoreFill, width: `${(sc / 10) * 100}%`, background: `linear-gradient(90deg, ${c}, var(--accent))` }} />
+                  </div>
+                  <div style={{ ...s.scoreText, color: c }}>{sc}/10</div>
+                </div>
+              </div>
+            )
+          })
+        )}
+      </div>
     </main>
   )
 }
 
-function Empty({ label }) {
+function EmptyState({ text, link, linkText }) {
   return (
-    <div style={{
-      textAlign: 'center', padding: '4rem',
-      color: 'var(--text3)', fontSize: '0.85rem',
-      border: '1px dashed var(--border)', borderRadius: '4px',
-    }}>
-      {label}
+    <div style={{ background: 'var(--surface)', border: '1px dashed var(--border2)', borderRadius: 'var(--radius)', padding: '2.5rem', textAlign: 'center' }}>
+      <div style={{ color: 'var(--text3)', fontSize: '0.875rem', marginBottom: '0.75rem' }}>{text}</div>
+      <Link to={link} style={{ color: 'var(--accent)', fontSize: '0.875rem', fontWeight: 600 }}>{linkText}</Link>
     </div>
   )
 }
 
-const styles = {
+const s = {
   main: { maxWidth: '900px', margin: '0 auto', padding: '3rem 2rem' },
-  pageHeader: { marginBottom: '2.5rem' },
-  label: { fontSize: '0.7rem', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--text3)', marginBottom: '0.5rem' },
-  h2: { fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 800 },
-  stats: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '1rem', marginBottom: '2.5rem' },
-  statCard: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '4px', padding: '1.5rem', textAlign: 'center' },
-  statNum: { fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 800, color: 'var(--accent)', marginBottom: '0.25rem' },
-  statLabel: { fontSize: '0.7rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text3)' },
-  tabs: { display: 'flex', gap: '0', marginBottom: '1.5rem', borderBottom: '1px solid var(--border)' },
-  tab: { background: 'transparent', border: 'none', borderBottom: '2px solid transparent', color: 'var(--text3)', padding: '0.75rem 1.5rem', fontSize: '0.8rem', letterSpacing: '0.1em', marginBottom: '-1px', transition: 'all 0.2s', cursor: 'pointer' },
-  tabActive: { color: 'var(--accent)', borderBottomColor: 'var(--accent)' },
-  sessionCard: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '4px', marginBottom: '1.25rem', overflow: 'hidden' },
-  sessionHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border)' },
-  fieldTag: { fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem', marginBottom: '0.25rem' },
-  ts: { fontSize: '0.7rem', color: 'var(--text3)' },
-  sessionScore: { fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.75rem' },
-  itemRow: { padding: '0.9rem 1.5rem', borderBottom: '1px solid var(--border)' },
-  itemQ: { fontSize: '0.85rem', color: 'var(--text)', marginBottom: '0.35rem' },
-  itemMeta: { display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.25rem' },
-  table: { width: '100%', borderCollapse: 'collapse' },
-  th: { fontSize: '0.65rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--text3)', textAlign: 'left', padding: '0.75rem 1rem', borderBottom: '1px solid var(--border)' },
-  tr: { borderBottom: '1px solid var(--border)' },
-  td: { fontSize: '0.85rem', color: 'var(--text2)', padding: '0.9rem 1rem' },
+  header: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' },
+  tag: { fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent)', marginBottom: '0.3rem' },
+  title: { fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 800, color: 'var(--text)' },
+  btnGroup: { display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' },
+  btnPrimary: { background: 'linear-gradient(135deg, var(--accent), var(--accent2))', color: '#07071a', padding: '0.65rem 1.25rem', fontWeight: 700, fontSize: '0.875rem', borderRadius: 'var(--radius-sm)' },
+  btnSecondary: { background: 'var(--surface)', border: '1px solid var(--border2)', color: 'var(--text)', padding: '0.65rem 1.25rem', fontSize: '0.875rem', fontWeight: 500, borderRadius: 'var(--radius-sm)' },
+  statsRow: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', marginBottom: '3rem' },
+  statCard: { borderRadius: 'var(--radius)', padding: '1.25rem 1.5rem' },
+  statVal: { fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 800, lineHeight: 1, marginBottom: '0.3rem' },
+  statLabel: { fontSize: '0.75rem', color: 'var(--text2)', fontWeight: 500 },
+  section: { marginBottom: '3rem' },
+  sectionHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' },
+  sectionTitle: { fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.1rem', color: 'var(--text)' },
+  count: { fontSize: '0.78rem', color: 'var(--text3)', background: 'var(--surface2)', border: '1px solid var(--border)', padding: '0.2rem 0.6rem', borderRadius: '100px' },
+  resultRow: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '1rem 1.25rem', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' },
+  rowLeft: { display: 'flex', alignItems: 'center', gap: '0.875rem' },
+  rowBadge: { padding: '0.25rem 0.75rem', borderRadius: '100px', fontSize: '0.75rem', fontWeight: 600, whiteSpace: 'nowrap' },
+  rowTitle: { fontWeight: 600, fontSize: '0.9rem', color: 'var(--text)', marginBottom: '0.15rem' },
+  rowDate: { fontSize: '0.75rem', color: 'var(--text3)' },
+  rowRight: { display: 'flex', alignItems: 'center', gap: '0.875rem', minWidth: '200px' },
+  scoreBar: { flex: 1, height: '5px', background: 'var(--surface2)', borderRadius: '3px', overflow: 'hidden' },
+  scoreFill: { height: '100%', borderRadius: '3px', transition: 'width 0.8s ease' },
+  scoreText: { fontSize: '0.875rem', fontWeight: 700, minWidth: '60px', textAlign: 'right' },
 }

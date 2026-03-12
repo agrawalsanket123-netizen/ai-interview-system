@@ -1,132 +1,104 @@
 import { useLocation, Link } from 'react-router-dom'
 
-const ScoreBar = ({ score }) => {
-  const pct = (score / 10) * 100
-  const color = score >= 7 ? 'var(--accent)' : score >= 5 ? '#ffd166' : 'var(--accent3)'
-  return (
-    <div style={{ marginTop: '0.5rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
-        <span style={{ fontSize: '0.7rem', color: 'var(--text3)' }}>Score</span>
-        <span style={{ fontSize: '0.8rem', fontWeight: 700, color }}>{score}/10</span>
-      </div>
-      <div style={{ height: '4px', background: 'var(--border)', borderRadius: '2px', overflow: 'hidden' }}>
-        <div style={{ height: '100%', width: `${pct}%`, background: color, borderRadius: '2px', transition: 'width 0.6s ease' }} />
-      </div>
-    </div>
-  )
-}
-
 export default function InterviewResult() {
   const { state } = useLocation()
-
-  if (!state) return (
-    <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text2)' }}>
-      No result data. <Link to="/interview" style={{ color: 'var(--accent)' }}>Take an interview</Link>
-    </div>
-  )
+  if (!state) return <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text2)' }}>No data. <Link to="/interview" style={{ color: 'var(--accent)' }}>Take interview</Link></div>
 
   const { field, results, overall_score } = state
-  const overallColor = overall_score >= 7 ? 'var(--accent)' : overall_score >= 5 ? '#ffd166' : 'var(--accent3)'
-  const verdict = overall_score >= 7 ? 'Excellent' : overall_score >= 5 ? 'Average' : 'Needs Improvement'
+  const verdict = overall_score >= 7 ? 'Excellent' : overall_score >= 5 ? 'Good' : 'Needs Practice'
+  const scoreColor = overall_score >= 7 ? 'var(--success)' : overall_score >= 5 ? 'var(--warning)' : 'var(--danger)'
 
   return (
-    <main style={styles.main}>
-      <div style={styles.header}>
-        <div style={styles.label}>{field.replace(/([A-Z])/g, ' $1').trim()} — Interview Results</div>
-        <div style={{ ...styles.verdict, color: overallColor, borderColor: overallColor }}>
-          {verdict.toUpperCase()}
+    <main style={s.main} className="page-enter">
+      <div style={s.header}>
+        <div>
+          <div style={s.tag}>{field.replace(/([A-Z])/g, ' $1').trim()} · Interview Results</div>
+          <h1 style={s.title}>Your Results</h1>
+        </div>
+        <div style={{ ...s.verdict, color: scoreColor, background: `${scoreColor}18`, border: `1px solid ${scoreColor}44` }}>
+          {verdict}
         </div>
       </div>
 
-      <div style={styles.scoreCard}>
-        <div style={{ ...styles.bigScore, color: overallColor }}>
-          {overall_score}
-          <span style={{ color: 'var(--text3)', fontSize: '2rem', fontFamily: 'var(--font-mono)' }}>/10</span>
+      <div style={s.scoreCard} className="stagger-1">
+        <div style={s.scoreLeft}>
+          <div style={{ ...s.bigScore, color: scoreColor }}>{overall_score}</div>
+          <div style={s.scoreOut}>/ 10</div>
         </div>
-        <div style={styles.scoreSub}>Overall AI Score</div>
-      </div>
-
-      <div style={styles.breakdown}>
-        <div style={styles.sectionLabel}>Question Breakdown</div>
-        {results.map((r, i) => (
-          <div key={i} style={styles.resultCard}>
-            <div style={styles.resultHeader}>
-              <span style={styles.qLabel}>Q{i + 1}</span>
-              <span style={styles.qText}>{r.question}</span>
-            </div>
-            <div style={styles.answerBlock}>
-              <div style={styles.answerLabel}>Your Answer</div>
-              <div style={styles.answerText}>{r.answer || <em style={{ color: 'var(--text3)' }}>No answer provided</em>}</div>
-            </div>
-            <div style={styles.feedbackBlock}>
-              <div style={styles.feedbackLabel}>AI Feedback</div>
-              <div style={styles.feedbackText}>{r.feedback}</div>
-            </div>
-            <ScoreBar score={r.score} />
+        <div style={s.scoreRight}>
+          <div style={s.scoreLabel}>Overall AI Score</div>
+          <div style={s.bar}><div style={{ ...s.barFill, width: `${(overall_score / 10) * 100}%`, background: `linear-gradient(90deg, ${scoreColor}, var(--accent))` }} /></div>
+          <div style={s.hint}>
+            {overall_score >= 7 ? '🎉 Excellent performance! You are interview-ready.' : overall_score >= 5 ? '📚 Good effort! Review feedback below to improve.' : '💪 Keep practicing! Study each AI feedback carefully.'}
           </div>
-        ))}
+        </div>
       </div>
 
-      <div style={styles.actions}>
-        <Link to="/interview" style={styles.btnPrimary}>Try Another Field →</Link>
-        <Link to="/dashboard" style={styles.btnSecondary}>View All Results</Link>
-        <Link to="/" style={styles.btnSecondary}>Home</Link>
+      <div style={s.sectionLabel}>Question Breakdown</div>
+      {(results || []).map((r, i) => {
+        const sc = r.score || 0
+        const c = sc >= 7 ? 'var(--success)' : sc >= 5 ? 'var(--warning)' : 'var(--danger)'
+        return (
+          <div key={i} style={s.resultCard} className="stagger-1">
+            <div style={s.resultTop}>
+              <div style={s.qBadge}>Q{i + 1}</div>
+              <div style={s.qText}>{r.question}</div>
+              <div style={{ ...s.scorePill, color: c, background: `${c}18`, border: `1px solid ${c}44` }}>{sc}/10</div>
+            </div>
+            <div style={s.answerBox}>
+              <div style={s.boxLabel}>Your Answer</div>
+              <div style={s.boxText}>{r.answer || <em style={{ color: 'var(--text3)' }}>No answer</em>}</div>
+            </div>
+            <div style={s.feedbackBox}>
+              <div style={{ ...s.boxLabel, color: 'var(--accent2)' }}>✦ AI Feedback</div>
+              <div style={s.boxText}>{r.feedback}</div>
+            </div>
+            <div style={s.barRow}>
+              <div style={s.barTrack}><div style={{ ...s.barFill2, width: `${(sc / 10) * 100}%`, background: `linear-gradient(90deg, ${c}, var(--accent))` }} /></div>
+              <span style={{ color: c, fontSize: '0.8rem', fontWeight: 700 }}>{sc}/10</span>
+            </div>
+          </div>
+        )
+      })}
+
+      <div style={s.actions}>
+        <Link to="/interview" style={s.btnPrimary} className="btn-glow">Try Another Field →</Link>
+        <Link to="/dashboard" style={s.btnSecondary}>View Dashboard</Link>
+        <Link to="/" style={s.btnSecondary}>Home</Link>
       </div>
     </main>
   )
 }
 
-const styles = {
+const s = {
   main: { maxWidth: '800px', margin: '0 auto', padding: '3rem 2rem' },
-  header: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2.5rem' },
-  label: { fontSize: '0.7rem', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--text3)' },
-  verdict: {
-    fontSize: '0.75rem', letterSpacing: '0.18em', fontWeight: 700,
-    border: '1px solid', padding: '0.25rem 0.75rem', borderRadius: '2px',
-  },
-  scoreCard: {
-    background: 'var(--surface)', border: '1px solid var(--border)',
-    borderRadius: '4px', padding: '3rem', textAlign: 'center', marginBottom: '3rem',
-  },
-  bigScore: { fontFamily: 'var(--font-display)', fontSize: '6rem', fontWeight: 800, lineHeight: 1 },
-  scoreSub: { color: 'var(--text2)', fontSize: '0.85rem', marginTop: '0.75rem', letterSpacing: '0.1em' },
-  breakdown: { marginBottom: '2.5rem' },
-  sectionLabel: {
-    fontSize: '0.7rem', letterSpacing: '0.18em', textTransform: 'uppercase',
-    color: 'var(--text3)', marginBottom: '1.25rem',
-  },
-  resultCard: {
-    background: 'var(--surface)', border: '1px solid var(--border)',
-    borderRadius: '4px', padding: '1.75rem', marginBottom: '1rem',
-  },
-  resultHeader: { display: 'flex', gap: '1rem', alignItems: 'flex-start', marginBottom: '1.25rem' },
-  qLabel: {
-    fontFamily: 'var(--font-display)', fontWeight: 800,
-    fontSize: '0.85rem', color: 'var(--accent)', flexShrink: 0,
-    paddingTop: '0.1rem',
-  },
-  qText: { fontSize: '0.95rem', lineHeight: 1.5, color: 'var(--text)' },
-  answerBlock: {
-    background: 'var(--surface2)', borderRadius: '3px',
-    padding: '1rem 1.25rem', marginBottom: '0.75rem',
-  },
-  answerLabel: { fontSize: '0.65rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--text3)', marginBottom: '0.4rem' },
-  answerText: { fontSize: '0.85rem', lineHeight: 1.6, color: 'var(--text2)' },
-  feedbackBlock: {
-    background: 'rgba(0,196,255,0.04)', border: '1px solid rgba(0,196,255,0.15)',
-    borderRadius: '3px', padding: '1rem 1.25rem', marginBottom: '0.75rem',
-  },
-  feedbackLabel: { fontSize: '0.65rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--accent2)', marginBottom: '0.4rem' },
-  feedbackText: { fontSize: '0.85rem', lineHeight: 1.6, color: 'var(--text)' },
-  actions: { display: 'flex', gap: '1rem', flexWrap: 'wrap' },
-  btnPrimary: {
-    background: 'var(--accent)', color: '#000',
-    padding: '0.85rem 2rem', fontWeight: 700,
-    fontSize: '0.85rem', letterSpacing: '0.08em', borderRadius: '2px',
-  },
-  btnSecondary: {
-    border: '1px solid var(--border)', color: 'var(--text2)',
-    padding: '0.85rem 1.5rem', fontSize: '0.85rem',
-    letterSpacing: '0.08em', borderRadius: '2px',
-  }
+  header: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' },
+  tag: { fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text3)', marginBottom: '0.5rem' },
+  title: { fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 800, color: 'var(--text)' },
+  verdict: { padding: '0.4rem 1.1rem', borderRadius: '100px', fontSize: '0.875rem', fontWeight: 600 },
+  scoreCard: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '2rem', display: 'flex', gap: '2rem', alignItems: 'center', marginBottom: '2.5rem', flexWrap: 'wrap' },
+  scoreLeft: { textAlign: 'center', minWidth: '100px' },
+  bigScore: { fontFamily: 'var(--font-display)', fontSize: '5rem', fontWeight: 800, lineHeight: 1 },
+  scoreOut: { color: 'var(--text3)', fontSize: '1rem' },
+  scoreRight: { flex: 1 },
+  scoreLabel: { fontWeight: 700, fontSize: '1rem', color: 'var(--text)', marginBottom: '0.75rem' },
+  bar: { height: '8px', background: 'var(--surface2)', borderRadius: '4px', overflow: 'hidden', marginBottom: '0.75rem' },
+  barFill: { height: '100%', borderRadius: '4px', transition: 'width 1s ease' },
+  hint: { fontSize: '0.875rem', color: 'var(--text2)', lineHeight: 1.5 },
+  sectionLabel: { fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text3)', marginBottom: '1.25rem' },
+  resultCard: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.5rem', marginBottom: '1rem' },
+  resultTop: { display: 'flex', gap: '0.75rem', alignItems: 'flex-start', marginBottom: '1rem' },
+  qBadge: { background: 'var(--surface2)', border: '1px solid var(--border)', color: 'var(--text2)', fontSize: '0.72rem', fontWeight: 700, padding: '0.2rem 0.6rem', borderRadius: '6px', flexShrink: 0 },
+  qText: { flex: 1, fontSize: '0.95rem', color: 'var(--text)', lineHeight: 1.5, fontWeight: 500 },
+  scorePill: { padding: '0.2rem 0.75rem', borderRadius: '100px', fontSize: '0.8rem', fontWeight: 700, flexShrink: 0 },
+  answerBox: { background: 'var(--surface2)', borderRadius: 'var(--radius-sm)', padding: '0.875rem 1rem', marginBottom: '0.75rem' },
+  feedbackBox: { background: 'rgba(184,167,245,0.06)', border: '1px solid rgba(184,167,245,0.2)', borderRadius: 'var(--radius-sm)', padding: '0.875rem 1rem', marginBottom: '0.75rem' },
+  boxLabel: { fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text3)', marginBottom: '0.35rem' },
+  boxText: { fontSize: '0.875rem', color: 'var(--text2)', lineHeight: 1.65 },
+  barRow: { display: 'flex', alignItems: 'center', gap: '0.75rem' },
+  barTrack: { flex: 1, height: '5px', background: 'var(--surface2)', borderRadius: '3px', overflow: 'hidden' },
+  barFill2: { height: '100%', borderRadius: '3px', transition: 'width 0.8s ease' },
+  actions: { display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '2rem' },
+  btnPrimary: { background: 'linear-gradient(135deg, var(--accent), var(--accent2))', color: '#07071a', padding: '0.875rem 1.75rem', fontWeight: 700, fontSize: '0.9rem', borderRadius: 'var(--radius-sm)' },
+  btnSecondary: { background: 'var(--surface)', border: '1px solid var(--border2)', color: 'var(--text)', padding: '0.875rem 1.5rem', fontSize: '0.9rem', fontWeight: 500, borderRadius: 'var(--radius-sm)' },
 }

@@ -5,11 +5,7 @@ export default function Navbar() {
   const location = useLocation()
   const { isLoggedIn, user, logout } = useAuth()
   const navigate = useNavigate()
-
-  const handleLogout = () => {
-    logout()
-    navigate('/login')
-  }
+  const handleLogout = () => { logout(); navigate('/login') }
 
   const links = [
     { to: '/', label: 'Home' },
@@ -19,36 +15,37 @@ export default function Navbar() {
   ]
 
   return (
-    <nav style={styles.nav}>
-      <Link to="/" style={styles.logo}>
-        AI<span style={{ color: 'var(--accent)' }}>NTERVIEW</span>
+    <nav style={s.nav}>
+      <Link to="/" style={s.logo}>
+        <div style={s.logoIcon}>AI</div>
+        <span style={s.logoText}>Interview</span>
       </Link>
 
-      <div style={styles.links}>
+      <div style={s.links}>
         {links.map(l => (
-          <Link
-            key={l.to}
-            to={l.to}
-            style={{
-              ...styles.link,
-              ...(location.pathname === l.to ? styles.active : {})
-            }}
-          >
+          <Link key={l.to} to={l.to} style={{
+            ...s.link,
+            ...(location.pathname === l.to ? s.active : {})
+          }}>
             {l.label}
+            {location.pathname === l.to && <div style={s.activeDot} />}
           </Link>
         ))}
       </div>
 
-      <div style={styles.authSection}>
+      <div style={s.auth}>
         {isLoggedIn ? (
           <>
-            <span style={styles.userName}>👤 {user?.full_name || user?.email}</span>
-            <button style={styles.logoutBtn} onClick={handleLogout}>Logout</button>
+            <div style={s.userChip}>
+              <div style={s.userAvatar}>{(user?.full_name || user?.email || 'U')[0].toUpperCase()}</div>
+              <span style={s.userName}>{user?.full_name?.split(' ')[0] || user?.email?.split('@')[0]}</span>
+            </div>
+            <button style={s.logoutBtn} onClick={handleLogout}>Sign out</button>
           </>
         ) : (
           <>
-            <Link to="/login" style={styles.loginBtn}>Login</Link>
-            <Link to="/register" style={styles.registerBtn}>Register</Link>
+            <Link to="/login" style={s.loginBtn}>Log in</Link>
+            <Link to="/register" style={s.registerBtn} className="btn-glow">Get Started</Link>
           </>
         )}
       </div>
@@ -56,20 +53,56 @@ export default function Navbar() {
   )
 }
 
-const styles = {
+const s = {
   nav: {
     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-    padding: '1rem 2.5rem', borderBottom: '1px solid var(--border)',
-    background: 'rgba(6,6,8,0.85)', backdropFilter: 'blur(12px)',
-    position: 'sticky', top: 0, zIndex: 100, flexWrap: 'wrap', gap: '0.5rem',
+    padding: '0.875rem 2.5rem',
+    background: 'rgba(7,7,26,0.8)',
+    backdropFilter: 'blur(20px)',
+    borderBottom: '1px solid var(--border)',
+    position: 'sticky', top: 0, zIndex: 100,
+    flexWrap: 'wrap', gap: '0.5rem',
   },
-  logo: { fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.3rem', letterSpacing: '0.05em', color: 'var(--text)' },
-  links: { display: 'flex', gap: '2rem', alignItems: 'center' },
-  link: { fontSize: '0.8rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text2)', transition: 'color 0.2s', padding: '0.25rem 0', borderBottom: '1px solid transparent' },
-  active: { color: 'var(--accent)', borderBottomColor: 'var(--accent)' },
-  authSection: { display: 'flex', alignItems: 'center', gap: '0.75rem' },
-  userName: { fontSize: '0.8rem', color: 'var(--text2)' },
-  logoutBtn: { background: 'transparent', border: '1px solid var(--border)', color: 'var(--text2)', padding: '0.3rem 0.85rem', fontSize: '0.75rem', borderRadius: '2px', cursor: 'pointer', letterSpacing: '0.08em' },
-  loginBtn: { fontSize: '0.8rem', color: 'var(--text2)', letterSpacing: '0.08em', border: '1px solid var(--border)', padding: '0.3rem 0.85rem', borderRadius: '2px' },
-  registerBtn: { fontSize: '0.8rem', color: '#000', background: 'var(--accent)', padding: '0.3rem 0.85rem', borderRadius: '2px', fontWeight: 700, letterSpacing: '0.08em' },
+  logo: { display: 'flex', alignItems: 'center', gap: '0.6rem' },
+  logoIcon: {
+    width: '32px', height: '32px', borderRadius: '8px',
+    background: 'linear-gradient(135deg, var(--accent), var(--accent2))',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    fontSize: '0.7rem', fontWeight: 800, color: '#fff', fontFamily: 'var(--font-display)',
+    letterSpacing: '0.05em',
+  },
+  logoText: { fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.05rem', color: 'var(--text)' },
+  links: { display: 'flex', gap: '0.25rem' },
+  link: {
+    fontSize: '0.875rem', color: 'var(--text2)', padding: '0.45rem 0.9rem',
+    borderRadius: 'var(--radius-sm)', transition: 'all 0.2s', fontWeight: 500,
+    position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px',
+  },
+  active: { color: 'var(--accent)', background: 'rgba(139,167,245,0.08)' },
+  activeDot: { width: '4px', height: '4px', borderRadius: '50%', background: 'var(--accent)' },
+  auth: { display: 'flex', alignItems: 'center', gap: '0.75rem' },
+  userChip: {
+    display: 'flex', alignItems: 'center', gap: '0.5rem',
+    background: 'var(--surface2)', border: '1px solid var(--border)',
+    borderRadius: '100px', padding: '0.3rem 0.75rem 0.3rem 0.3rem',
+  },
+  userAvatar: {
+    width: '24px', height: '24px', borderRadius: '50%',
+    background: 'linear-gradient(135deg, var(--accent), var(--accent2))',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    fontSize: '0.7rem', fontWeight: 700, color: '#fff',
+  },
+  userName: { fontSize: '0.82rem', color: 'var(--text)', fontWeight: 500 },
+  logoutBtn: {
+    background: 'transparent', border: '1px solid var(--border)',
+    color: 'var(--text2)', padding: '0.4rem 1rem',
+    fontSize: '0.82rem', borderRadius: 'var(--radius-sm)', fontWeight: 500,
+    transition: 'all 0.2s',
+  },
+  loginBtn: { fontSize: '0.875rem', color: 'var(--text2)', padding: '0.4rem 1rem', borderRadius: 'var(--radius-sm)', fontWeight: 500 },
+  registerBtn: {
+    fontSize: '0.875rem', color: '#07071a',
+    background: 'linear-gradient(135deg, var(--accent), var(--accent2))',
+    padding: '0.4rem 1.1rem', borderRadius: 'var(--radius-sm)', fontWeight: 700,
+  },
 }

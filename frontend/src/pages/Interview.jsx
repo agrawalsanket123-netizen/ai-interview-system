@@ -16,360 +16,197 @@ export default function Interview() {
   const [listening, setListening] = useState(false)
   const [speaking, setSpeaking] = useState(false)
   const [voiceEnabled, setVoiceEnabled] = useState(true)
-  const textRef = useRef(null)
   const recognitionRef = useRef(null)
 
-  // ---------- TEXT TO SPEECH ----------
   const speak = (text) => {
     if (!voiceEnabled) return
     window.speechSynthesis.cancel()
-    const utterance = new SpeechSynthesisUtterance(text)
-    utterance.rate = 0.9
-    utterance.pitch = 1
-    utterance.volume = 1
+    const u = new SpeechSynthesisUtterance(text)
+    u.rate = 0.9; u.pitch = 1; u.volume = 1
     const voices = window.speechSynthesis.getVoices()
-    const preferred = voices.find(v =>
-      v.name.includes('Google') || v.name.includes('David') || v.name.includes('Zira')
-    )
-    if (preferred) utterance.voice = preferred
-    utterance.onstart = () => setSpeaking(true)
-    utterance.onend = () => setSpeaking(false)
-    utterance.onerror = () => setSpeaking(false)
-    window.speechSynthesis.speak(utterance)
+    const preferred = voices.find(v => v.name.includes('Google') || v.name.includes('David'))
+    if (preferred) u.voice = preferred
+    u.onstart = () => setSpeaking(true)
+    u.onend = () => setSpeaking(false)
+    u.onerror = () => setSpeaking(false)
+    window.speechSynthesis.speak(u)
   }
+  const stopSpeaking = () => { window.speechSynthesis.cancel(); setSpeaking(false) }
 
-  const stopSpeaking = () => {
-    window.speechSynthesis.cancel()
-    setSpeaking(false)
-  }
-
-  // ---------- LOAD QUESTIONS ----------
   useEffect(() => {
     axios.get(`${BASE_URL}/api/interview/questions/${field}`).then(r => {
-      setQuestions(r.data.questions)
-      setLoading(false)
+      setQuestions(r.data.questions); setLoading(false)
     }).catch(() => navigate('/interview'))
   }, [field])
 
-  // Speak welcome + first question when questions load
   useEffect(() => {
     if (questions.length > 0 && voiceEnabled) {
       const fieldName = field.replace(/([A-Z])/g, ' $1').trim()
-      const t = setTimeout(() => {
-        speak(`Welcome to the ${fieldName} interview. I will read each question aloud. Question 1. ${questions[0]}`)
-      }, 500)
-      return () => clearTimeout(t)
+      setTimeout(() => speak(`Welcome to the ${fieldName} interview. Question 1. ${questions[0]}`), 500)
     }
   }, [questions])
 
-  // Speak question when navigating (but not on first load, handled above)
-  const prevCurrentRef = useRef(null)
+  const prevRef = useRef(null)
   useEffect(() => {
-    if (questions.length > 0 && voiceEnabled && prevCurrentRef.current !== null && prevCurrentRef.current !== current) {
-      const t = setTimeout(() => speak(`Question ${current + 1}. ${questions[current]}`), 300)
-      return () => clearTimeout(t)
+    if (questions.length > 0 && voiceEnabled && prevRef.current !== null && prevRef.current !== current) {
+      setTimeout(() => speak(`Question ${current + 1}. ${questions[current]}`), 300)
     }
-    prevCurrentRef.current = current
+    prevRef.current = current
   }, [current])
 
-  // Cleanup on unmount
   useEffect(() => () => window.speechSynthesis.cancel(), [])
 
-  // ---------- SPEECH RECOGNITION ----------
   const startListening = () => {
-    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
-      alert('Speech recognition not supported in this browser. Use Chrome.')
-      return
-    }
+    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) { alert('Use Chrome for voice input.'); return }
     stopSpeaking()
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition
     const rec = new SR()
-    rec.continuous = false
-    rec.interimResults = false
-    rec.lang = 'en-US'
+    rec.continuous = false; rec.interimResults = false; rec.lang = 'en-US'
     rec.onstart = () => setListening(true)
     rec.onend = () => setListening(false)
     rec.onresult = (e) => {
-      const transcript = e.results[0][0].transcript
-      setAnswers(a => ({ ...a, [current]: (a[current] || '') + ' ' + transcript }))
+      const t = e.results[0][0].transcript
+      setAnswers(a => ({ ...a, [current]: (a[current] || '') + ' ' + t }))
     }
-    rec.start()
-    recognitionRef.current = rec
+    rec.start(); recognitionRef.current = rec
   }
+  const stopListening = () => { recognitionRef.current?.stop(); setListening(false) }
 
-  const stopListening = () => {
-    recognitionRef.current?.stop()
-    setListening(false)
-  }
+  const goTo = (idx) => { stopSpeaking(); prevRef.current = current; setCurrent(idx) }
 
-  const goToQuestion = (idx) => {
-    stopSpeaking()
-    prevCurrentRef.current = current
-    setCurrent(idx)
-  }
-
-  // ---------- SUBMIT ----------
   const submit = async () => {
-    const unanswered = questions.filter((_, i) => !answers[i] || answers[i].trim() === '')
-    if (unanswered.length > 0) {
-      speak(`Please answer all questions. ${unanswered.length} question remaining.`)
-      alert(`Please answer all questions. ${unanswered.length} question(s) remaining.`)
-      return
-    }
-    stopSpeaking()
-    speak('Submitting your answers for AI evaluation. Please wait.')
-    setSubmitting(true)
+    const unanswered = questions.filter((_, i) => !answers[i]?.trim())
+    if (unanswered.length) { alert(`${unanswered.length} question(s) unanswered.`); return }
+    stopSpeaking(); setSubmitting(true)
     const responses = questions.map((q, i) => ({ question: q, answer: answers[i] || '' }))
     try {
       const res = await axios.post(`${BASE_URL}/api/interview/evaluate`, { field, responses }, { headers: { Authorization: `Bearer ${token}` } })
       navigate('/interview/result', { state: res.data })
-    } catch (e) {
-      speak('Evaluation failed. Please make sure the backend is running.')
-      alert('Evaluation failed. Make sure the backend is running.')
-      setSubmitting(false)
-    }
+    } catch { alert('Evaluation failed. Check backend.'); setSubmitting(false) }
   }
 
-  if (loading) return <PageLoader />
+  if (loading) return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', flexDirection: 'column', gap: '1rem' }}>
+      <div style={{ width: '32px', height: '32px', border: '3px solid var(--border2)', borderTopColor: 'var(--accent)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <div style={{ color: 'var(--text2)', fontSize: '0.875rem' }}>Loading questions...</div>
+    </div>
+  )
 
   const q = questions[current]
-  const allAnswered = questions.every((_, i) => answers[i] && answers[i].trim())
+  const allAnswered = questions.every((_, i) => answers[i]?.trim())
 
   return (
-    <main style={styles.main}>
-      {/* Header */}
-      <div style={styles.header}>
-        <div>
-          <div style={styles.label}>{field.replace(/([A-Z])/g, ' $1').trim()} Interview</div>
-          <div style={styles.counter}>Question {current + 1} of {questions.length}</div>
-        </div>
-        <div style={styles.rightHeader}>
-          <button
-            style={{
-              ...styles.voiceToggle,
-              background: voiceEnabled ? 'rgba(0,255,135,0.1)' : 'var(--surface2)',
-              borderColor: voiceEnabled ? 'var(--accent)' : 'var(--border)',
-              color: voiceEnabled ? 'var(--accent)' : 'var(--text3)',
-            }}
-            onClick={() => { if (voiceEnabled) stopSpeaking(); setVoiceEnabled(v => !v) }}
-          >
-            {voiceEnabled ? '🔊 Voice ON' : '🔇 Voice OFF'}
-          </button>
+    <main style={s.main} className="page-enter">
+      <div style={s.topBar}>
+        <div style={{ ...s.topFill, width: `${((Object.keys(answers).length) / questions.length) * 100}%` }} />
+      </div>
 
+      <div style={s.header}>
+        <div>
+          <div style={s.fieldTag}>{field.replace(/([A-Z])/g, ' $1').trim()} Interview</div>
+          <div style={s.counter}>Question {current + 1} / {questions.length}</div>
+        </div>
+        <div style={s.controls}>
+          <button style={{ ...s.voiceBtn, borderColor: voiceEnabled ? 'var(--accent)' : 'var(--border)', color: voiceEnabled ? 'var(--accent)' : 'var(--text3)', background: voiceEnabled ? 'rgba(139,167,245,0.08)' : 'transparent' }}
+            onClick={() => { if (voiceEnabled) stopSpeaking(); setVoiceEnabled(v => !v) }}>
+            {voiceEnabled ? '🔊' : '🔇'}
+          </button>
           {voiceEnabled && (
-            <button
-              style={{
-                ...styles.replayBtn,
-                background: speaking ? 'rgba(255,107,107,0.1)' : 'var(--surface2)',
-                borderColor: speaking ? 'var(--accent3)' : 'var(--border)',
-                color: speaking ? 'var(--accent3)' : 'var(--text2)',
-              }}
-              onClick={() => speaking ? stopSpeaking() : speak(`Question ${current + 1}. ${q}`)}
-            >
-              {speaking ? '⏹ Stop' : '▶ Replay'}
+            <button style={{ ...s.replayBtn, color: speaking ? 'var(--danger)' : 'var(--text2)' }}
+              onClick={() => speaking ? stopSpeaking() : speak(`Question ${current + 1}. ${q}`)}>
+              {speaking ? '⏹' : '▶'}
             </button>
           )}
-
-          <div style={styles.progress}>
+          <div style={s.dots}>
             {questions.map((_, i) => (
-              <div
-                key={i}
-                onClick={() => goToQuestion(i)}
-                style={{
-                  ...styles.dot,
-                  background: answers[i] ? 'var(--accent)' : i === current ? 'var(--text2)' : 'var(--border)',
-                  cursor: 'pointer',
-                }}
-                title={`Q${i + 1}`}
-              />
+              <div key={i} onClick={() => goTo(i)} style={{
+                ...s.dot, cursor: 'pointer',
+                background: answers[i] ? 'var(--accent)' : i === current ? 'var(--accent2)' : 'var(--surface3)',
+                boxShadow: i === current ? '0 0 8px var(--accent-glow)' : 'none',
+              }} />
             ))}
           </div>
         </div>
       </div>
 
-      {/* Speaking indicator */}
       {speaking && (
-        <div style={styles.speakingBanner}>
-          <div style={styles.speakingWave}>
-            {[...Array(5)].map((_, i) => (
-              <div key={i} style={{ ...styles.bar, animationDelay: `${i * 0.1}s` }} />
-            ))}
-          </div>
+        <div style={s.speakBanner}>
+          <div style={s.wave}>{[...Array(5)].map((_, i) => <div key={i} style={{ ...s.waveBar, animationDelay: `${i * 0.1}s` }} />)}</div>
           Reading question aloud...
         </div>
       )}
 
-      {/* Question Card */}
-      <div style={styles.qCard}>
-        <div style={styles.qNum}>Q{current + 1}</div>
-        <div style={styles.qText}>{q}</div>
-
-        <div style={styles.textareaWrapper}>
-          <textarea
-            ref={textRef}
-            style={styles.textarea}
-            rows={5}
-            placeholder="Type your answer here, or use voice input below..."
-            value={answers[current] || ''}
-            onChange={e => setAnswers(a => ({ ...a, [current]: e.target.value }))}
-          />
-          <div style={styles.textareaFooter}>
-            <span style={{ color: 'var(--text3)', fontSize: '0.7rem' }}>
-              {(answers[current] || '').length} chars
-            </span>
-            <button
-              style={{
-                ...styles.micBtn,
-                background: listening ? 'var(--accent3)' : 'var(--surface2)',
-                color: listening ? '#fff' : 'var(--text2)',
-              }}
-              onClick={listening ? stopListening : startListening}
-            >
-              {listening ? '⏹ Stop Recording' : '🎤 Voice Answer'}
+      <div style={s.qCard} className="stagger-1">
+        <div style={s.qNum}>Q{current + 1}</div>
+        <div style={s.qText}>{q}</div>
+        <div style={s.textareaWrap}>
+          <textarea style={s.textarea} rows={5} placeholder="Type your answer here, or use voice input..."
+            value={answers[current] || ''} onChange={e => setAnswers(a => ({ ...a, [current]: e.target.value }))} />
+          <div style={s.taFooter}>
+            <span style={{ fontSize: '0.72rem', color: 'var(--text3)' }}>{(answers[current] || '').length} chars</span>
+            <button style={{ ...s.micBtn, background: listening ? 'var(--danger)' : 'var(--surface3)', color: listening ? '#fff' : 'var(--text2)' }}
+              onClick={listening ? stopListening : startListening}>
+              {listening ? '⏹ Stop' : '🎤 Voice'}
             </button>
           </div>
         </div>
-
         {listening && (
-          <div style={styles.listeningBadge}>
-            <span style={styles.pulse} /> Listening to your answer...
+          <div style={s.listeningBadge}>
+            <span style={s.pulse} /> Listening...
           </div>
         )}
       </div>
 
-      {/* Navigation */}
-      <div style={styles.navRow}>
-        <button
-          style={{ ...styles.navBtn, opacity: current === 0 ? 0.3 : 1 }}
-          onClick={() => goToQuestion(Math.max(0, current - 1))}
-          disabled={current === 0}
-        >← Prev</button>
-
+      <div style={s.navRow}>
+        <button style={{ ...s.navBtn, opacity: current === 0 ? 0.3 : 1 }} onClick={() => goTo(Math.max(0, current - 1))} disabled={current === 0}>← Prev</button>
         <div style={{ display: 'flex', gap: '0.75rem' }}>
-          {current < questions.length - 1 && (
-            <button style={styles.navBtn} onClick={() => goToQuestion(current + 1)}>Next →</button>
-          )}
-          {allAnswered && (
-            <button
-              style={{ ...styles.submitBtn, opacity: submitting ? 0.7 : 1 }}
-              onClick={submit}
-              disabled={submitting}
-            >
-              {submitting ? 'Evaluating with AI...' : 'Submit for AI Evaluation →'}
-            </button>
-          )}
+          {current < questions.length - 1 && <button style={s.navBtn} onClick={() => goTo(current + 1)}>Next →</button>}
+          {allAnswered && <button style={{ ...s.submitBtn, opacity: submitting ? 0.7 : 1 }} className="btn-glow" onClick={submit} disabled={submitting}>{submitting ? 'Evaluating...' : 'Submit →'}</button>}
         </div>
       </div>
 
       {submitting && (
-        <div style={styles.evaluatingBanner}>
-          <div style={styles.spinner} />
-          Claude AI is evaluating your answers... This may take a moment.
+        <div style={s.evalBanner}>
+          <div style={s.spinner} />
+          AI is evaluating your answers...
         </div>
       )}
 
       <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
-        @keyframes soundBar { 0%,100% { height: 4px; } 50% { height: 18px; } }
+        @keyframes soundBar { 0%,100%{height:4px} 50%{height:20px} }
+        @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.3} }
       `}</style>
     </main>
   )
 }
 
-function PageLoader() {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-      <div style={{ color: 'var(--text2)', fontSize: '0.85rem', letterSpacing: '0.1em' }}>LOADING QUESTIONS...</div>
-    </div>
-  )
-}
-
-const styles = {
-  main: { maxWidth: '800px', margin: '0 auto', padding: '3rem 2rem' },
-  header: {
-    display: 'flex', alignItems: 'flex-start',
-    justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem',
-  },
-  label: { fontSize: '0.7rem', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--accent)', marginBottom: '0.4rem' },
+const s = {
+  main: { maxWidth: '800px', margin: '0 auto', padding: '0 2rem 4rem' },
+  topBar: { height: '3px', background: 'var(--surface2)', marginBottom: '2.5rem', borderRadius: '2px', overflow: 'hidden' },
+  topFill: { height: '100%', background: 'linear-gradient(90deg, var(--accent), var(--accent2))', borderRadius: '2px', transition: 'width 0.4s ease' },
+  header: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' },
+  fieldTag: { fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent)', marginBottom: '0.3rem' },
   counter: { fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.1rem', color: 'var(--text2)' },
-  rightHeader: { display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' },
-  voiceToggle: {
-    border: '1px solid', padding: '0.35rem 0.85rem', fontSize: '0.75rem',
-    borderRadius: '2px', transition: 'all 0.2s', letterSpacing: '0.05em', cursor: 'pointer',
-  },
-  replayBtn: {
-    border: '1px solid', padding: '0.35rem 0.85rem', fontSize: '0.75rem',
-    borderRadius: '2px', transition: 'all 0.2s', letterSpacing: '0.05em', cursor: 'pointer',
-  },
-  progress: { display: 'flex', gap: '0.4rem', paddingTop: '0.25rem' },
-  dot: { width: '32px', height: '4px', borderRadius: '2px', transition: 'background 0.3s' },
-  speakingBanner: {
-    display: 'flex', alignItems: 'center', gap: '0.75rem',
-    background: 'rgba(0,255,135,0.04)', border: '1px solid rgba(0,255,135,0.15)',
-    borderRadius: '3px', padding: '0.6rem 1rem',
-    fontSize: '0.8rem', color: 'var(--accent)', marginBottom: '1.25rem',
-  },
-  speakingWave: { display: 'flex', alignItems: 'center', gap: '3px', height: '24px' },
-  bar: {
-    width: '3px', height: '4px', background: 'var(--accent)',
-    borderRadius: '2px', animation: 'soundBar 0.5s ease-in-out infinite',
-  },
-  qCard: {
-    background: 'var(--surface)', border: '1px solid var(--border)',
-    borderRadius: '4px', padding: '2.5rem', marginBottom: '2rem',
-  },
-  qNum: {
-    fontFamily: 'var(--font-display)', fontSize: '3rem',
-    fontWeight: 800, color: 'var(--text3)', marginBottom: '1rem',
-  },
-  qText: { fontSize: '1.15rem', lineHeight: 1.6, marginBottom: '2rem', color: 'var(--text)' },
-  textareaWrapper: {
-    background: 'var(--surface2)', border: '1px solid var(--border)',
-    borderRadius: '3px', overflow: 'hidden',
-  },
-  textarea: {
-    width: '100%', background: 'transparent', border: 'none',
-    outline: 'none', padding: '1rem 1.25rem',
-    color: 'var(--text)', fontSize: '0.9rem', lineHeight: 1.7,
-    resize: 'vertical', display: 'block',
-  },
-  textareaFooter: {
-    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-    padding: '0.5rem 1rem', borderTop: '1px solid var(--border)',
-  },
-  micBtn: {
-    border: 'none', padding: '0.35rem 0.85rem', fontSize: '0.75rem',
-    borderRadius: '2px', transition: 'all 0.2s', letterSpacing: '0.05em', cursor: 'pointer',
-  },
-  listeningBadge: {
-    display: 'flex', alignItems: 'center', gap: '0.5rem',
-    marginTop: '0.75rem', color: 'var(--accent3)', fontSize: '0.8rem',
-  },
-  pulse: {
-    display: 'inline-block', width: '8px', height: '8px',
-    borderRadius: '50%', background: 'var(--accent3)', animation: 'pulse 1s infinite',
-  },
+  controls: { display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' },
+  voiceBtn: { border: '1px solid', padding: '0.4rem 0.75rem', borderRadius: 'var(--radius-sm)', fontSize: '1rem', transition: 'all 0.2s', cursor: 'pointer', background: 'transparent' },
+  replayBtn: { border: '1px solid var(--border)', padding: '0.4rem 0.75rem', borderRadius: 'var(--radius-sm)', fontSize: '0.9rem', transition: 'all 0.2s', cursor: 'pointer', background: 'transparent' },
+  dots: { display: 'flex', gap: '0.35rem' },
+  dot: { width: '28px', height: '5px', borderRadius: '3px', transition: 'all 0.3s' },
+  speakBanner: { display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(139,167,245,0.06)', border: '1px solid rgba(139,167,245,0.2)', borderRadius: 'var(--radius-sm)', padding: '0.6rem 1rem', fontSize: '0.8rem', color: 'var(--accent)', marginBottom: '1.25rem' },
+  wave: { display: 'flex', alignItems: 'center', gap: '3px', height: '24px' },
+  waveBar: { width: '3px', height: '4px', background: 'var(--accent)', borderRadius: '2px', animation: 'soundBar 0.5s ease-in-out infinite' },
+  qCard: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '2.5rem', marginBottom: '2rem' },
+  qNum: { fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 800, color: 'var(--surface3)', marginBottom: '1rem', lineHeight: 1 },
+  qText: { fontSize: '1.1rem', lineHeight: 1.65, marginBottom: '2rem', color: 'var(--text)', fontWeight: 500 },
+  textareaWrap: { background: 'var(--surface2)', border: '1.5px solid var(--border)', borderRadius: 'var(--radius-sm)', overflow: 'hidden', transition: 'border-color 0.2s' },
+  textarea: { width: '100%', background: 'transparent', border: 'none', outline: 'none', padding: '1rem 1.25rem', color: 'var(--text)', fontSize: '0.9rem', lineHeight: 1.7, resize: 'vertical', display: 'block' },
+  taFooter: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 1rem', borderTop: '1px solid var(--border)' },
+  micBtn: { border: 'none', padding: '0.3rem 0.85rem', fontSize: '0.78rem', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s' },
+  listeningBadge: { display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.75rem', color: 'var(--danger)', fontSize: '0.82rem' },
+  pulse: { display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: 'var(--danger)', animation: 'pulse-dot 1s infinite' },
   navRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  navBtn: {
-    background: 'transparent', border: '1px solid var(--border)',
-    color: 'var(--text2)', padding: '0.75rem 1.5rem',
-    fontSize: '0.8rem', letterSpacing: '0.08em', borderRadius: '2px', cursor: 'pointer',
-  },
-  submitBtn: {
-    background: 'var(--accent)', color: '#000', border: 'none',
-    padding: '0.75rem 2rem', fontWeight: 700, fontSize: '0.85rem',
-    letterSpacing: '0.08em', borderRadius: '2px', cursor: 'pointer',
-  },
-  evaluatingBanner: {
-    marginTop: '2rem', background: 'rgba(0,255,135,0.05)',
-    border: '1px solid rgba(0,255,135,0.2)', borderRadius: '4px', padding: '1.25rem',
-    display: 'flex', alignItems: 'center', gap: '1rem',
-    fontSize: '0.85rem', color: 'var(--accent)',
-  },
-  spinner: {
-    width: '18px', height: '18px',
-    border: '2px solid rgba(0,255,135,0.3)', borderTopColor: 'var(--accent)',
-    borderRadius: '50%', animation: 'spin 0.8s linear infinite', flexShrink: 0,
-  }
+  navBtn: { background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text2)', padding: '0.75rem 1.5rem', fontSize: '0.85rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer', transition: 'all 0.2s' },
+  submitBtn: { background: 'linear-gradient(135deg, var(--accent), var(--accent2))', color: '#07071a', border: 'none', padding: '0.75rem 2rem', fontWeight: 700, fontSize: '0.9rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer' },
+  evalBanner: { marginTop: '2rem', background: 'rgba(139,167,245,0.06)', border: '1px solid rgba(139,167,245,0.2)', borderRadius: 'var(--radius-sm)', padding: '1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.875rem', color: 'var(--accent)' },
+  spinner: { width: '18px', height: '18px', border: '2px solid rgba(139,167,245,0.3)', borderTopColor: 'var(--accent)', borderRadius: '50%', animation: 'spin 0.8s linear infinite', flexShrink: 0 },
 }
