@@ -13,11 +13,12 @@
   --border2: #cdc3b4;
 
   /* Soft indigo accents */
-  --accent: #5b6abf;
-  --accent-glow: rgba(91,106,191,0.18);
-  --accent2: #7c6abf;
-  --accent3: #4a9abf;
-  --accent4: #bf6a9a;
+ /* Coastal blue accents */
+--accent: #5B8DEF;
+--accent-glow: rgba(91,141,239,0.18);
+--accent2: #4A7FE8;
+--accent3: #3B6FD4;
+--accent4: #7EB3F5;
   --success: #3aab7a;
   --warning: #c49a2a;
   --danger: #c45a6a;
@@ -62,7 +63,7 @@ body::before {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background-image: radial-gradient(circle, rgba(91,106,191,0.07) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(91,141,239,0.07) 1px, transparent 1px);
   background-size: 28px 28px;
 }
 
@@ -74,7 +75,7 @@ body::after {
   right: -5%;
   width: 600px;
   height: 600px;
-  background: radial-gradient(circle, rgba(91,106,191,0.06) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(91,141,239,0.06) 0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
 }
@@ -136,7 +137,7 @@ body::after {
 }
 .card-hover:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 36px rgba(91,106,191,0.1);
+  box-shadow: 0 10px 36px rgba(91,141,239,0.1);
   border-color: var(--border2) !important;
 }
 
