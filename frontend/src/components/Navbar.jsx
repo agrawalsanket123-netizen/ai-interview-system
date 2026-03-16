@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../AuthContext'
+import logo from '../assets/logo.png'
 
 export default function Navbar() {
   const location = useLocation()
@@ -20,8 +21,7 @@ export default function Navbar() {
   return (
     <nav style={s.nav}>
       <Link to="/" style={s.logo} onClick={() => setMenuOpen(false)}>
-        <div style={s.logoIcon}>AI</div>
-        <span style={s.logoText}>Interview</span>
+        <img src={logo} alt="Skillscope AI" style={s.logoImg} />
       </Link>
 
       {/* Desktop links */}
@@ -89,17 +89,15 @@ export default function Navbar() {
 const s = {
   nav: {
     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-    padding: '0.875rem 2.5rem',
+    padding: '0.75rem 2.5rem',
     background: 'rgba(250,247,242,0.9)',
     backdropFilter: 'blur(20px)',
     borderBottom: '1px solid var(--border)',
     position: 'sticky', top: 0, zIndex: 100,
     flexWrap: 'wrap', gap: '0.5rem',
-    position: 'relative',
   },
-  logo: { display: 'flex', alignItems: 'center', gap: '0.6rem', zIndex: 1 },
-  logoIcon: { width: '32px', height: '32px', borderRadius: '8px', background: 'linear-gradient(135deg, var(--accent), var(--accent2))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 800, color: '#fff', fontFamily: 'var(--font-display)', letterSpacing: '0.05em' },
-  logoText: { fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.05rem', color: 'var(--text)' },
+  logo: { display: 'flex', alignItems: 'center', zIndex: 1 },
+  logoImg: { height: '42px', width: 'auto', objectFit: 'contain' },
   links: { display: 'flex', gap: '0.25rem' },
   link: { fontSize: '0.875rem', color: 'var(--text2)', padding: '0.45rem 0.9rem', borderRadius: 'var(--radius-sm)', transition: 'all 0.2s', fontWeight: 500, position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px' },
   active: { color: 'var(--accent)', background: 'rgba(91,106,191,0.08)' },
