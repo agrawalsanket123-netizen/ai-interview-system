@@ -97,7 +97,7 @@ const s = {
     flexWrap: 'wrap', gap: '0.5rem',
   },
   logo: { display: 'flex', alignItems: 'center', zIndex: 1 },
-  logoImg: { height: '80px', width: 'auto', objectFit: 'contain' },
+  logoImg: { height: '120px', width: 'auto', objectFit: 'contain' },
   links: { display: 'flex', gap: '0.25rem' },
   link: { fontSize: '0.875rem', color: 'var(--text2)', padding: '0.45rem 0.9rem', borderRadius: 'var(--radius-sm)', transition: 'all 0.2s', fontWeight: 500, position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px' },
   active: { color: 'var(--accent)', background: 'rgba(91,106,191,0.08)' },
