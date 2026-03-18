@@ -4,13 +4,14 @@ import axios from 'axios'
 import BASE_URL from '../api'
 import { useAuth } from '../AuthContext'
 
-const TOTAL_SECONDS = 20 * 60 // 20 minutes
+const TOTAL_SECONDS = 20 * 60
 
-function useTimer(onExpire) {
+function useTimer(onExpire, started) {
   const [timeLeft, setTimeLeft] = useState(TOTAL_SECONDS)
   const timerRef = useRef(null)
 
   useEffect(() => {
+    if (!started) return
     timerRef.current = setInterval(() => {
       setTimeLeft(t => {
         if (t <= 1) { clearInterval(timerRef.current); onExpire(); return 0 }
@@ -18,7 +19,7 @@ function useTimer(onExpire) {
       })
     }, 1000)
     return () => clearInterval(timerRef.current)
-  }, [])
+  }, [started])
 
   const mins = String(Math.floor(timeLeft / 60)).padStart(2, '0')
   const secs = String(timeLeft % 60).padStart(2, '0')
@@ -40,6 +41,7 @@ export default function Interview() {
   const [listening, setListening] = useState(false)
   const [speaking, setSpeaking] = useState(false)
   const [voiceEnabled, setVoiceEnabled] = useState(true)
+  const [started, setStarted] = useState(false)
   const recognitionRef = useRef(null)
 
   const submit = async (auto = false) => {
@@ -55,7 +57,7 @@ export default function Interview() {
     } catch { alert('Evaluation failed. Check backend.'); setSubmitting(false) }
   }
 
-  const { mins, secs, isWarning, isDanger } = useTimer(() => submit(true))
+  const { mins, secs, isWarning, isDanger } = useTimer(() => submit(true), started)
 
   const speak = (text) => {
     if (!voiceEnabled) return
@@ -79,11 +81,11 @@ export default function Interview() {
   }, [field])
 
   useEffect(() => {
-    if (questions.length > 0 && voiceEnabled) {
+    if (questions.length > 0 && voiceEnabled && started) {
       const fieldName = field.replace(/([A-Z])/g, ' $1').trim()
       setTimeout(() => speak(`Welcome to the ${fieldName} interview. Question 1. ${questions[0]}`), 500)
     }
-  }, [questions])
+  }, [questions, started])
 
   const prevRef = useRef(null)
   useEffect(() => {
@@ -110,7 +112,6 @@ export default function Interview() {
     rec.start(); recognitionRef.current = rec
   }
   const stopListening = () => { recognitionRef.current?.stop(); setListening(false) }
-
   const goTo = (idx) => { stopSpeaking(); prevRef.current = current; setCurrent(idx) }
 
   if (loading) return (
@@ -118,6 +119,28 @@ export default function Interview() {
       <div style={{ width: '32px', height: '32px', border: '3px solid var(--border2)', borderTopColor: 'var(--accent)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
       <div style={{ color: 'var(--text2)', fontSize: '0.875rem' }}>Loading questions...</div>
     </div>
+  )
+
+  if (!started) return (
+    <main style={ss.main} className="page-enter">
+      <div style={ss.card}>
+        <div style={ss.icon}>🎯</div>
+        <h2 style={ss.title}>{field.replace(/([A-Z])/g, ' $1').trim()} Interview</h2>
+        <p style={ss.sub}>You will be asked <strong>10 questions</strong> specific to your chosen field. Each answer is scored 0–10 by AI.</p>
+        <div style={ss.infoGrid}>
+          <div style={ss.infoItem}><span style={ss.infoIcon}>⏱</span><span style={ss.infoLabel}>20 Minutes</span></div>
+          <div style={ss.infoItem}><span style={ss.infoIcon}>📋</span><span style={ss.infoLabel}>10 Questions</span></div>
+          <div style={ss.infoItem}><span style={ss.infoIcon}>🤖</span><span style={ss.infoLabel}>AI Scoring</span></div>
+          <div style={ss.infoItem}><span style={ss.infoIcon}>🎤</span><span style={ss.infoLabel}>Voice Input</span></div>
+          <div style={ss.infoItem}><span style={ss.infoIcon}>📊</span><span style={ss.infoLabel}>0-10 Score</span></div>
+          <div style={ss.infoItem}><span style={ss.infoIcon}>💬</span><span style={ss.infoLabel}>AI Feedback</span></div>
+        </div>
+        <p style={ss.warning}>⚠️ Timer starts as soon as you click Start Interview. Do not refresh the page.</p>
+        <button style={ss.startBtn} className="btn-glow" onClick={() => setStarted(true)}>
+          Start Interview →
+        </button>
+      </div>
+    </main>
   )
 
   const q = questions[current]
@@ -138,14 +161,7 @@ export default function Interview() {
           <div style={s.counter}>Question {current + 1} / {questions.length}</div>
         </div>
 
-        {/* ⏱ Timer */}
-        <div style={{
-          ...s.timerBox,
-          color: timerColor,
-          background: timerBg,
-          border: `1px solid ${timerBorder}`,
-          animation: isDanger ? 'pulse-glow 1s infinite' : 'none'
-        }}>
+        <div style={{ ...s.timerBox, color: timerColor, background: timerBg, border: `1px solid ${timerBorder}`, animation: isDanger ? 'pulse-glow 1s infinite' : 'none' }}>
           <span>⏱</span>
           <span style={s.timerText}>{mins}:{secs}</span>
           {isWarning && <span style={{ fontSize: '0.7rem', fontWeight: 600 }}>{isDanger ? '⚠️ Hurry!' : 'Ending soon'}</span>}
@@ -223,6 +239,20 @@ export default function Interview() {
       `}</style>
     </main>
   )
+}
+
+const ss = {
+  main: { maxWidth: '600px', margin: '0 auto', padding: '4rem 2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '70vh' },
+  card: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '3rem', textAlign: 'center', boxShadow: '0 8px 32px rgba(0,0,0,0.06)', width: '100%' },
+  icon: { fontSize: '3rem', marginBottom: '1rem' },
+  title: { fontFamily: 'var(--font-display)', fontSize: '1.75rem', fontWeight: 800, color: 'var(--text)', marginBottom: '0.75rem' },
+  sub: { color: 'var(--text2)', fontSize: '0.95rem', lineHeight: 1.7, marginBottom: '2rem' },
+  infoGrid: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', marginBottom: '2rem' },
+  infoItem: { background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.35rem' },
+  infoIcon: { fontSize: '1.25rem' },
+  infoLabel: { fontSize: '0.75rem', fontWeight: 600, color: 'var(--text2)' },
+  warning: { background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', fontSize: '0.82rem', color: '#92400e', marginBottom: '2rem' },
+  startBtn: { background: 'linear-gradient(135deg, var(--accent), var(--accent2))', color: '#fff', border: 'none', padding: '0.875rem 2.5rem', fontWeight: 700, fontSize: '1rem', borderRadius: 'var(--radius)', cursor: 'pointer', display: 'inline-block' },
 }
 
 const s = {
