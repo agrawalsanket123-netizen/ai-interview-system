@@ -7,7 +7,9 @@ const FIELDS = [
   { id: 'DataAnalysis', label: 'Data Analysis', desc: 'EDA, visualization, statistics, pandas', icon: '📊', color: 'rgba(74,154,191,0.08)', accent: 'var(--accent3)', border: 'rgba(74,154,191,0.25)' },
   { id: 'WebDevelopment', label: 'Web Development', desc: 'HTML, CSS, JavaScript, React, APIs', icon: '🌐', color: 'rgba(91,106,191,0.08)', accent: 'var(--accent)', border: 'rgba(91,106,191,0.25)' },
   { id: 'MachineLearning', label: 'Machine Learning', desc: 'Models, training, evaluation, ML theory', icon: '🤖', color: 'rgba(124,106,191,0.08)', accent: 'var(--accent2)', border: 'rgba(124,106,191,0.25)' },
-  { id: 'CyberSecurity', label: 'Cyber Security', desc: 'Encryption, firewalls, threats, networks', icon: '🔒', color: 'rgba(58,171,122,0.08)', accent: 'var(--success)', border: 'rgba(58,171,122,0.25)' },
+  { id: 'CyberSecurity', label: 'Cyber Security', desc: 'Encryption, firewalls, threats, networks', icon: '🔒', color: 'rgba(91,141,239,0.08)', accent: 'var(--accent)', border: 'rgba(91,141,239,0.25)' },
+  { id: 'SoftwareDevelopment', label: 'Software Development', desc: 'Agile, SOLID, CI/CD, design patterns', icon: '💻', color: 'rgba(91,141,239,0.08)', accent: 'var(--accent)', border: 'rgba(91,141,239,0.25)' },
+  { id: 'ArtificialIntelligence', label: 'Artificial Intelligence', desc: 'Neural networks, NLP, deep learning, LLMs', icon: '🧠', color: 'rgba(124,106,191,0.08)', accent: 'var(--accent2)', border: 'rgba(124,106,191,0.25)' },
 ]
 
 const WORDS = ['Aptitude Tests', 'AI Scoring', 'Voice Interviews', 'Instant Feedback']
@@ -15,7 +17,7 @@ const WORDS = ['Aptitude Tests', 'AI Scoring', 'Voice Interviews', 'Instant Feed
 const STEPS = [
   { n: '01', title: 'Create Account', desc: 'Sign up free. Your results are saved privately and securely.', color: 'var(--accent)' },
   { n: '02', title: 'Aptitude Test', desc: '10 randomized logic & reasoning questions with instant scoring.', color: 'var(--accent2)' },
-  { n: '03', title: 'Pick Your Field', desc: 'Choose from Data Analysis, Web Dev, ML, or Cyber Security.', color: 'var(--accent3)' },
+  { n: '03', title: 'Pick Your Field', desc: 'Choose from 6 fields: Data Analysis, Web Dev, ML, Cyber Security, Software Dev, or AI.', color: 'var(--accent3)' },
   { n: '04', title: 'Get AI Feedback', desc: 'Each answer scored 0–10 with detailed improvement suggestions.', color: 'var(--success)' },
 ]
 
@@ -78,7 +80,7 @@ export default function Home() {
         <div style={s.statsGrid}>
           {[
             { val: '40+', label: 'Questions', color: 'var(--accent)', bg: 'rgba(91,106,191,0.07)', border: 'rgba(91,106,191,0.18)' },
-            { val: '4', label: 'Tech Fields', color: 'var(--accent2)', bg: 'rgba(124,106,191,0.07)', border: 'rgba(124,106,191,0.18)' },
+            { val: '6', label: 'Tech Fields', color: 'var(--accent2)', bg: 'rgba(124,106,191,0.07)', border: 'rgba(124,106,191,0.18)' },
             { val: 'AI', label: 'Scoring', color: 'var(--accent3)', bg: 'rgba(74,154,191,0.07)', border: 'rgba(74,154,191,0.18)' },
             { val: '∞', label: 'Practice', color: 'var(--success)', bg: 'rgba(58,171,122,0.07)', border: 'rgba(58,171,122,0.18)' },
           ].map((st, i) => (
