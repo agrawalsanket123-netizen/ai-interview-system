@@ -138,7 +138,7 @@ export default function Home() {
         <div style={s.whyInner} className="why-grid">
           <div style={s.whyLeft} className="scroll-animate-left scroll-animate">
             <div style={s.sectionLabel}>Why Use This?</div>
-            <h2 style={{ ...s.sectionTitle, marginBottom: '1rem' }}>Practice makes perfect</h2>
+            <h2 style={{ ...s.sectionTitle, marginBottom: '1rem' }}>From Practice to Confidence</h2>
             <p style={s.whyText}>Most candidates fail not because they don't know the material — but because they've never practiced answering technical questions out loud under pressure.</p>
             <p style={{ ...s.whyText, marginTop: '0.75rem' }}>Our AI gives you honest, detailed feedback on every answer so you can improve before the real thing.</p>
           </div>
