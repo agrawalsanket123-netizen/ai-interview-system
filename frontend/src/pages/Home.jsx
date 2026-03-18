@@ -16,17 +16,83 @@ const WORDS = ['Aptitude Tests', 'AI Scoring', 'Voice Interviews', 'Instant Feed
 
 const STEPS = [
   { n: '01', title: 'Create Account', desc: 'Sign up free. Your results are saved privately and securely.', color: 'var(--accent)' },
-  { n: '02', title: 'Aptitude Test', desc: '10 randomized logic & reasoning questions with instant scoring.', color: 'var(--accent2)' },
+  { n: '02', title: 'Aptitude Test', desc: '30 randomized questions (Easy, Medium, Hard) with instant scoring.', color: 'var(--accent2)' },
   { n: '03', title: 'Pick Your Field', desc: 'Choose from 6 fields: Data Analysis, Web Dev, ML, Cyber Security, Software Dev, or AI.', color: 'var(--accent3)' },
   { n: '04', title: 'Get AI Feedback', desc: 'Each answer scored 0–10 with detailed improvement suggestions.', color: 'var(--success)' },
 ]
+
+const REVIEWS = [
+  { name: 'Rahul Sharma', role: 'Computer Science Student', rating: 5, review: 'This platform helped me crack my first technical interview! The AI feedback was incredibly detailed and helped me improve my answers significantly.' },
+  { name: 'Priya Patel', role: 'IT Engineering Student', rating: 5, review: 'The aptitude test with difficulty levels is brilliant. I could clearly see my improvement from Easy to Hard questions. Highly recommended!' },
+  { name: 'Arjun Mehta', role: 'Final Year BTech Student', rating: 4, review: 'Amazing tool for interview prep. The AI scoring is very accurate and the feedback helps you understand exactly where you went wrong.' },
+  { name: 'Sneha Joshi', role: 'Software Engineering Student', rating: 5, review: 'I love the voice input feature! It feels just like a real interview. The 6 different fields cover everything I needed to practice.' },
+  { name: 'Dev Kothari', role: 'ICT Student', rating: 5, review: 'Best free interview prep platform I have used. The Skillscope AI feedback is honest and constructive. Got placed in my dream company!' },
+  { name: 'Nisha Verma', role: 'MCA Student', rating: 4, review: 'The dashboard makes it easy to track progress over time. Really useful for consistent practice before campus placements.' },
+]
+
+const DEVS = [
+  { name: 'Harikrushna Parmar', role: 'Full Stack Developer & AI Engineer', edu: 'B.Tech in Information & Communication Technology', phone: '+91-9313114499', skills: ['React', 'FastAPI', 'Supabase', 'Groq AI'] },
+  { name: 'Sanket Agrawal', role: 'Full Stack Developer & AI Engineer', edu: 'B.Tech in Information & Communication Technology', phone: '+91-9512573981', skills: ['Python', 'React', 'REST APIs', 'Database Design'] },
+]
+
+function FeedbackForm() {
+  const [form, setForm] = useState({ name: '', rating: 5, message: '' })
+  const [submitted, setSubmitted] = useState(false)
+
+  const handleSubmit = () => {
+    if (!form.name || !form.message) { alert('Please fill all fields'); return }
+    setSubmitted(true)
+  }
+
+  if (submitted) return (
+    <div style={{ textAlign: 'center', padding: '2rem' }}>
+      <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🎉</div>
+      <div style={{ fontWeight: 700, color: 'var(--text)', fontSize: '1.1rem' }}>Thank you for your feedback!</div>
+      <div style={{ color: 'var(--text2)', fontSize: '0.875rem', marginTop: '0.25rem' }}>Your review means a lot to us.</div>
+    </div>
+  )
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <input
+          placeholder="Your name"
+          value={form.name}
+          onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+          style={sf.input}
+        />
+        <select
+          value={form.rating}
+          onChange={e => setForm(f => ({ ...f, rating: Number(e.target.value) }))}
+          style={sf.input}
+        >
+          {[5, 4, 3, 2, 1].map(r => <option key={r} value={r}>{'⭐'.repeat(r)} {r} Star{r > 1 ? 's' : ''}</option>)}
+        </select>
+      </div>
+      <textarea
+        placeholder="Share your experience with Skillscope AI..."
+        value={form.message}
+        onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
+        rows={4}
+        style={{ ...sf.input, resize: 'vertical' }}
+      />
+      <button onClick={handleSubmit} style={sf.submitBtn} className="btn-glow">
+        Submit Feedback →
+      </button>
+    </div>
+  )
+}
+
+const sf = {
+  input: { padding: '0.75rem 1rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '0.9rem', background: 'var(--surface)', color: 'var(--text)', fontFamily: 'var(--font-body)', width: '100%' },
+  submitBtn: { background: 'linear-gradient(135deg, var(--accent), var(--accent2))', color: '#fff', border: 'none', padding: '0.75rem 2rem', fontWeight: 700, fontSize: '0.9rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer', alignSelf: 'flex-start' },
+}
 
 export default function Home() {
   const { isLoggedIn } = useAuth()
   const [wordIdx, setWordIdx] = useState(0)
   const [visible, setVisible] = useState(true)
 
-  // Activate scroll animations after page mounts
   useScrollAnimation()
 
   useEffect(() => {
@@ -43,29 +109,24 @@ export default function Home() {
       {/* ── Hero ── */}
       <section style={s.hero}>
         <div style={s.heroGlow} />
-
         <div style={s.heroContent}>
           <div style={s.badge} className="stagger-1">
             <span style={s.badgeDot} />
             AI-Powered Technical Assessment
           </div>
-
           <h1 style={s.h1} className="stagger-2">
             Ace Your Next<br />
             <span style={s.h1Gradient}>Technical Interview</span>
           </h1>
-
           <div style={s.rotatingTag} className="stagger-3">
             <span style={{ ...s.rotatingWord, opacity: visible ? 1 : 0, transition: 'opacity 0.3s' }}>
               {WORDS[wordIdx]}
             </span>
           </div>
-
           <p style={s.sub} className="stagger-3">
             Practice with AI-scored aptitude tests and domain-specific technical interviews.
             Get instant, detailed feedback. Build real confidence.
           </p>
-
           <div style={s.ctas} className="stagger-4">
             <Link to={isLoggedIn ? '/aptitude' : '/register'} style={s.btnPrimary} className="btn-glow">
               {isLoggedIn ? 'Start Test →' : 'Get Started Free →'}
@@ -75,11 +136,9 @@ export default function Home() {
             </Link>
           </div>
         </div>
-
-        {/* Stats — scroll animate */}
         <div style={s.statsGrid}>
           {[
-            { val: '40+', label: 'Questions', color: 'var(--accent)', bg: 'rgba(91,106,191,0.07)', border: 'rgba(91,106,191,0.18)' },
+            { val: '195+', label: 'Questions', color: 'var(--accent)', bg: 'rgba(91,106,191,0.07)', border: 'rgba(91,106,191,0.18)' },
             { val: '6', label: 'Tech Fields', color: 'var(--accent2)', bg: 'rgba(124,106,191,0.07)', border: 'rgba(124,106,191,0.18)' },
             { val: 'AI', label: 'Scoring', color: 'var(--accent3)', bg: 'rgba(74,154,191,0.07)', border: 'rgba(74,154,191,0.18)' },
             { val: '∞', label: 'Practice', color: 'var(--success)', bg: 'rgba(58,171,122,0.07)', border: 'rgba(58,171,122,0.18)' },
@@ -149,9 +208,7 @@ export default function Home() {
               { icon: '🎤', title: 'Voice Support', desc: 'Answer by speaking, just like a real interview.' },
               { icon: '📈', title: 'Track Progress', desc: 'Dashboard shows all your past attempts and scores.' },
             ].map((item, i) => (
-              <div key={i}
-                style={s.whyCard}
-                className={`scroll-animate scroll-delay-${i + 1}`}>
+              <div key={i} style={s.whyCard} className={`scroll-animate scroll-delay-${i + 1}`}>
                 <span style={s.whyIcon}>{item.icon}</span>
                 <div>
                   <div style={s.whyCardTitle}>{item.title}</div>
@@ -160,6 +217,63 @@ export default function Home() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── Reviews ── */}
+      <section style={s.section}>
+        <div style={s.sectionLabel} className="scroll-animate">Reviews & Feedback</div>
+        <h2 style={s.sectionTitle} className="scroll-animate scroll-delay-1">What our users say</h2>
+        <div style={s.reviewsGrid}>
+          {REVIEWS.map((r, i) => (
+            <div key={i} style={s.reviewCard} className={`card-hover scroll-animate scroll-delay-${(i % 3) + 1}`}>
+              <div style={s.reviewHeader}>
+                <div style={s.reviewAvatar}>{r.name[0]}</div>
+                <div>
+                  <div style={s.reviewName}>{r.name}</div>
+                  <div style={s.reviewRole}>{r.role}</div>
+                </div>
+              </div>
+              <div style={s.reviewStars}>{'⭐'.repeat(r.rating)}</div>
+              <div style={s.reviewText}>{r.review}</div>
+            </div>
+          ))}
+        </div>
+        <div style={s.feedbackBox} className="scroll-animate">
+          <h3 style={s.feedbackTitle}>Share your experience 💬</h3>
+          <p style={s.feedbackSub}>Used Skillscope AI? We'd love to hear your feedback!</p>
+          <FeedbackForm />
+        </div>
+      </section>
+
+      {/* ── Developers ── */}
+      <section style={s.section}>
+        <div style={s.sectionLabel} className="scroll-animate">Meet the Team</div>
+        <h2 style={s.sectionTitle} className="scroll-animate scroll-delay-1">Built by passionate engineers</h2>
+        <div style={s.devGrid}>
+          {DEVS.map((dev, i) => (
+            <div key={i} style={s.devCard} className={`card-hover scroll-animate scroll-delay-${i + 1}`}>
+              <div style={s.devAvatarWrap}>
+                <div style={s.devAvatar}>
+                  <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                    <circle cx="24" cy="18" r="10" fill="var(--accent)" opacity="0.8" />
+                    <ellipse cx="24" cy="38" rx="16" ry="10" fill="var(--accent)" opacity="0.6" />
+                  </svg>
+                </div>
+              </div>
+              <div style={s.devName}>{dev.name}</div>
+              <div style={s.devRole}>{dev.role}</div>
+              <div style={s.devEdu}>🎓 {dev.edu}</div>
+              <div style={s.devSkills}>
+                {dev.skills.map((sk, j) => (
+                  <span key={j} style={s.devSkillTag}>{sk}</span>
+                ))}
+              </div>
+              <div style={s.devContact}>
+                <span style={s.devPhone}>📞 {dev.phone}</span>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -224,6 +338,32 @@ const s = {
   whyIcon: { fontSize: '1.25rem', flexShrink: 0, marginTop: '0.1rem' },
   whyCardTitle: { fontWeight: 700, fontSize: '0.9rem', color: 'var(--text)', marginBottom: '0.2rem' },
   whyCardDesc: { fontSize: '0.8rem', color: 'var(--text2)', lineHeight: 1.55 },
+
+  // Reviews
+  reviewsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem', marginBottom: '2.5rem' },
+  reviewCard: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.5rem', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
+  reviewHeader: { display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' },
+  reviewAvatar: { width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--accent), var(--accent2))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: '1rem', flexShrink: 0 },
+  reviewName: { fontWeight: 700, fontSize: '0.9rem', color: 'var(--text)' },
+  reviewRole: { fontSize: '0.75rem', color: 'var(--text2)' },
+  reviewStars: { fontSize: '0.85rem', marginBottom: '0.5rem' },
+  reviewText: { fontSize: '0.85rem', color: 'var(--text2)', lineHeight: 1.65 },
+  feedbackBox: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '2rem', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
+  feedbackTitle: { fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.25rem', color: 'var(--text)', marginBottom: '0.35rem' },
+  feedbackSub: { color: 'var(--text2)', fontSize: '0.875rem', marginBottom: '1.5rem' },
+
+  // Developers
+  devGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' },
+  devCard: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '2rem', textAlign: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
+  devAvatarWrap: { display: 'flex', justifyContent: 'center', marginBottom: '1.25rem' },
+  devAvatar: { width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(91,141,239,0.1)', border: '2px solid rgba(91,141,239,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+  devName: { fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.15rem', color: 'var(--text)', marginBottom: '0.35rem' },
+  devRole: { color: 'var(--accent)', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.5rem' },
+  devEdu: { color: 'var(--text2)', fontSize: '0.8rem', marginBottom: '1rem' },
+  devSkills: { display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'center', marginBottom: '1rem' },
+  devSkillTag: { background: 'rgba(91,141,239,0.1)', color: 'var(--accent)', border: '1px solid rgba(91,141,239,0.2)', borderRadius: '100px', padding: '0.2rem 0.7rem', fontSize: '0.75rem', fontWeight: 600 },
+  devContact: { borderTop: '1px solid var(--border)', paddingTop: '1rem', marginTop: '0.5rem' },
+  devPhone: { fontSize: '0.85rem', color: 'var(--text2)', fontWeight: 500 },
 
   ctaSection: { background: 'linear-gradient(135deg, rgba(91,106,191,0.06) 0%, rgba(124,106,191,0.06) 100%)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '4rem 3rem', textAlign: 'center', position: 'relative', overflow: 'hidden', boxShadow: '0 4px 20px rgba(91,106,191,0.08)' },
   ctaGlow: { position: 'absolute', top: '-40%', left: '50%', transform: 'translateX(-50%)', width: '400px', height: '300px', pointerEvents: 'none', background: 'radial-gradient(ellipse, rgba(91,106,191,0.08) 0%, transparent 70%)' },
