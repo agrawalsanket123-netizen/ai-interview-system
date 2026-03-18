@@ -173,8 +173,12 @@ def get_fields():
 # ---------- APTITUDE ROUTES ----------
 @app.get("/api/aptitude/questions")
 def get_aptitude_questions():
-    questions = random.sample(ALL_APTITUDE_QUESTIONS, 10)
-    return {"questions": [{"id": i, "question": q["question"], "options": q["options"]} for i, q in enumerate(questions)], "session_questions": questions}
+    easy = [q for q in ALL_APTITUDE_QUESTIONS if q["difficulty"] == "Easy"]
+medium = [q for q in ALL_APTITUDE_QUESTIONS if q["difficulty"] == "Medium"]
+hard = [q for q in ALL_APTITUDE_QUESTIONS if q["difficulty"] == "Hard"]
+questions = random.sample(easy, 10) + random.sample(medium, 10) + random.sample(hard, 10)
+random.shuffle(questions)
+return {"questions": [{"id": i, "question": q["question"], "options": q["options"], "difficulty": q["difficulty"]} for i, q in enumerate(questions)], "session_questions": questions}
 
 @app.post("/api/aptitude/submit")
 def submit_aptitude(req: AptitudeAnswerRequest, current_user=Depends(get_current_user)):
