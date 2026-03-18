@@ -78,13 +78,13 @@ const res = await axios.post(`${BASE_URL}/api/aptitude/submit`, { answers: order
         <h2 style={ss.title}>Aptitude Test</h2>
         <p style={ss.sub}>You will be asked <strong>30 questions</strong> divided into Easy, Medium and Hard levels.</p>
         <div style={ss.infoGrid}>
-          <div style={ss.infoItem}><span style={ss.infoIcon}>⏱</span><span style={ss.infoLabel}>60 Minutes</span></div>
-          <div style={ss.infoItem}><span style={ss.infoIcon}>📋</span><span style={ss.infoLabel}>30 Questions</span></div>
-          <div style={ss.infoItem}><span style={ss.infoIcon}>🟢</span><span style={ss.infoLabel}>10 Easy</span></div>
-          <div style={ss.infoItem}><span style={ss.infoIcon}>🟡</span><span style={ss.infoLabel}>10 Medium</span></div>
-          <div style={ss.infoItem}><span style={ss.infoIcon}>🔴</span><span style={ss.infoLabel}>10 Hard</span></div>
-          <div style={ss.infoItem}><span style={ss.infoIcon}>🤖</span><span style={ss.infoLabel}>Auto Submit</span></div>
-        </div>
+  <div style={ss.infoItem}><span style={ss.infoIcon}>⏱</span><span style={ss.infoLabel}>60 Minutes</span></div>
+  <div style={ss.infoItem}><span style={ss.infoIcon}>📋</span><span style={ss.infoLabel}>30 Questions</span></div>
+  <div style={ss.infoItem}><span style={ss.infoIcon}>🤖</span><span style={ss.infoLabel}>Auto Submit</span></div>
+  <div style={ss.infoItem}><span style={ss.infoIcon}>🟢</span><span style={ss.infoLabel}>10 Easy</span></div>
+  <div style={ss.infoItem}><span style={ss.infoIcon}>🟡</span><span style={ss.infoLabel}>10 Medium</span></div>
+  <div style={ss.infoItem}><span style={ss.infoIcon}>🔴</span><span style={ss.infoLabel}>10 Hard</span></div>
+</div>
         <p style={ss.warning}>⚠️ Timer starts as soon as you click Start Test. Do not refresh the page.</p>
         <button style={ss.startBtn} className="btn-glow" onClick={() => setStarted(true)}>
           Start Test →
