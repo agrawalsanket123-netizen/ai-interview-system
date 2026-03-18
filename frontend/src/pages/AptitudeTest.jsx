@@ -50,8 +50,12 @@ export default function AptitudeTest() {
       alert('Please answer all questions.'); return
     }
     setSubmitting(true)
-    const ordered = questions.map(q => answers[q.id] || '')
-    const res = await axios.post(`${BASE_URL}/api/aptitude/submit`, { answers: ordered }, { headers: { Authorization: `Bearer ${token}` } })
+    const ordered = questions.map(q => ({
+  question: q.question,
+  answer: answers[q.id] || '',
+  correct_answer: q.correct_answer || ''
+}))
+const res = await axios.post(`${BASE_URL}/api/aptitude/submit`, { answers: ordered }, { headers: { Authorization: `Bearer ${token}` } })
     navigate('/aptitude/result', { state: res.data })
   }
 

@@ -67,7 +67,7 @@ class LoginRequest(BaseModel):
     password: str
 
 class AptitudeAnswerRequest(BaseModel):
-    answers: List[str]
+    answers: List[dict]
 
 class InterviewAnswerRequest(BaseModel):
     field: str
@@ -178,46 +178,47 @@ def get_aptitude_questions():
     hard = [q for q in ALL_APTITUDE_QUESTIONS if q["difficulty"] == "Hard"]
     questions = random.sample(easy, 10) + random.sample(medium, 10) + random.sample(hard, 10)
     return {
-        "questions": [
-            {
-                "id": i,
-                "question": q["question"],
-                "options": q["options"],
-                "difficulty": q["difficulty"]
-            }
-            for i, q in enumerate(questions)
-        ],
-        "session_questions": questions
-    }
+    "questions": [
+        {
+            "id": i,
+            "question": q["question"],
+            "options": q["options"],
+            "difficulty": q["difficulty"],
+            "correct_answer": q["answer"]
+        }
+        for i, q in enumerate(questions)
+    ],
+    "session_questions": questions
+}
 @app.post("/api/aptitude/submit")
 def submit_aptitude(req: AptitudeAnswerRequest, current_user=Depends(get_current_user)):
-    # Re-fetch questions based on answers length
-    questions = random.sample(ALL_APTITUDE_QUESTIONS, len(req.answers))
     score = 0
     results = []
-    for ans, q in zip(req.answers, questions):
-        correct = ans.upper() == q["answer"]
+    for item in req.answers:
+        question_text = item.get("question", "")
+        user_answer = item.get("answer", "").upper()
+        correct_answer = item.get("correct_answer", "")
+        correct = user_answer == correct_answer.upper()
         if correct:
             score += 1
         results.append({
-            "question": q["question"],
-            "your_answer": ans.upper(),
-            "correct_answer": q["answer"],
+            "question": question_text,
+            "your_answer": user_answer,
+            "correct_answer": correct_answer,
             "correct": correct
         })
 
-    # Save to Supabase
     try:
         supabase.table("aptitude_results").insert({
             "user_id": current_user.id,
             "score": score,
-            "total": len(questions),
+            "total": len(results),
             "results": results
         }).execute()
     except Exception as e:
         print(f"DB save error: {e}")
 
-    return {"score": score, "total": len(questions), "results": results}
+    return {"score": score, "total": len(results), "results": results}
 
 @app.get("/api/interview/questions/{field}")
 def get_interview_questions(field: str):
@@ -263,3 +264,19 @@ def get_interview_results(current_user=Depends(get_current_user)):
         return {"results": res.data}
     except Exception as e:
         return {"results": []}
+@app.post("/api/aptitude/submit")
+def submit_aptitude(req: AptitudeAnswerRequest, current_user=Depends(get_current_user)):
+    # Re-fetch questions based on answers length
+    questions = random.sample(ALL_APTITUDE_QUESTIONS, len(req.answers))
+    score = 0
+    results = []
+    for ans, q in zip(req.answers, questions):
+        correct = ans.upper() == q["answer"]
+        if correct:
+            score += 1
+        results.append({
+            "question": q["question"],
+            "your_answer": ans.upper(),
+            "correct_answer": q["answer"],
+            "correct": correct
+        })
