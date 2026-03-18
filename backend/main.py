@@ -15,19 +15,6 @@ from dotenv import load_dotenv
 import random
 
 load_dotenv()
-import threading
-import urllib.request
-
-def keep_alive():
-    while True:
-        try:
-            urllib.request.urlopen('https://ai-interview-backend-lfe0.onrender.com/')
-            print("Keep-alive ping sent")
-        except:
-            pass
-        threading.Event().wait(840)
-
-threading.Thread(target=keep_alive, daemon=True).start()
 
 # ---------- CLIENTS ----------
 groq_client = Groq(api_key=os.environ.get("GROQ_API_KEY", ""))
