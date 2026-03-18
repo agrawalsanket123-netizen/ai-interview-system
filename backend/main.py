@@ -177,7 +177,6 @@ def get_aptitude_questions():
     medium = [q for q in ALL_APTITUDE_QUESTIONS if q["difficulty"] == "Medium"]
     hard = [q for q in ALL_APTITUDE_QUESTIONS if q["difficulty"] == "Hard"]
     questions = random.sample(easy, 10) + random.sample(medium, 10) + random.sample(hard, 10)
-    random.shuffle(questions)
     return {
         "questions": [
             {
