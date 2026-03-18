@@ -4,6 +4,12 @@ import axios from 'axios'
 import BASE_URL from '../api'
 import { useAuth } from '../AuthContext'
 
+const DIFFICULTY_STYLES = {
+  Easy: { label: '🟢 Easy', color: '#22c55e', bg: 'rgba(34,197,94,0.1)', border: 'rgba(34,197,94,0.3)' },
+  Medium: { label: '🟡 Medium', color: '#f59e0b', bg: 'rgba(245,158,11,0.1)', border: 'rgba(245,158,11,0.3)' },
+  Hard: { label: '🔴 Hard', color: '#ef4444', bg: 'rgba(239,68,68,0.1)', border: 'rgba(239,68,68,0.3)' },
+}
+
 export default function AptitudeTest() {
   const [questions, setQuestions] = useState([])
   const [answers, setAnswers] = useState({})
@@ -33,6 +39,7 @@ export default function AptitudeTest() {
 
   const q = questions[current]
   const answered = Object.keys(answers).length
+  const diff = DIFFICULTY_STYLES[q.difficulty] || DIFFICULTY_STYLES['Easy']
 
   return (
     <main style={s.main} className="page-enter page-pad">
@@ -44,7 +51,18 @@ export default function AptitudeTest() {
       <div style={s.header}>
         <div style={s.headerLeft}>
           <div style={s.tag}>Aptitude Test</div>
-          <div style={s.qCounter}>Question {current + 1} of {questions.length}</div>
+          <div style={s.qCounterRow}>
+            <div style={s.qCounter}>Question {current + 1} of {questions.length}</div>
+            {/* Difficulty Badge */}
+            <div style={{
+              ...s.diffBadge,
+              color: diff.color,
+              background: diff.bg,
+              border: `1px solid ${diff.border}`
+            }}>
+              {diff.label}
+            </div>
+          </div>
         </div>
         <div style={s.dots}>
           {questions.map((_, i) => (
@@ -58,7 +76,17 @@ export default function AptitudeTest() {
       </div>
 
       <div style={s.qCard} className="stagger-1">
-        <div style={s.qNum}>Q{current + 1}</div>
+        <div style={s.qNumRow}>
+          <div style={s.qNum}>Q{current + 1}</div>
+          <div style={{
+            ...s.diffBadgeLarge,
+            color: diff.color,
+            background: diff.bg,
+            border: `1px solid ${diff.border}`
+          }}>
+            {diff.label}
+          </div>
+        </div>
         <div style={s.qText}>{q.question}</div>
         <div style={s.options}>
           {Object.entries(q.options).map(([key, val]) => (
@@ -108,11 +136,15 @@ const s = {
   header: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' },
   headerLeft: {},
   tag: { fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent)', marginBottom: '0.3rem' },
+  qCounterRow: { display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' },
   qCounter: { fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.1rem', color: 'var(--text2)' },
+  diffBadge: { fontSize: '0.72rem', fontWeight: 700, padding: '0.2rem 0.7rem', borderRadius: '100px' },
+  diffBadgeLarge: { fontSize: '0.8rem', fontWeight: 700, padding: '0.3rem 0.9rem', borderRadius: '100px' },
   dots: { display: 'flex', gap: '0.4rem', flexWrap: 'wrap' },
   dot: { width: '28px', height: '5px', borderRadius: '3px', cursor: 'pointer', transition: 'all 0.3s' },
   qCard: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '2.5rem', marginBottom: '2rem' },
-  qNum: { fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 800, color: 'var(--surface3)', marginBottom: '1rem', lineHeight: 1 },
+  qNumRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' },
+  qNum: { fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 800, color: 'var(--surface3)', lineHeight: 1 },
   qText: { fontSize: '1.1rem', lineHeight: 1.65, marginBottom: '2rem', color: 'var(--text)', fontWeight: 500 },
   options: { display: 'flex', flexDirection: 'column', gap: '0.75rem' },
   option: {
@@ -122,7 +154,7 @@ const s = {
     color: 'var(--text)', fontSize: '0.9rem', textAlign: 'left',
     transition: 'all 0.2s', cursor: 'pointer',
   },
-  optionSelected: { border: '1.5px solid var(--accent)', background: 'rgba(91,106,191,0.08)', color: 'var(--text)' },
+  optionSelected: { border: '1.5px solid var(--accent)', background: 'rgba(91,141,239,0.08)', color: 'var(--text)' },
   optKey: { fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '0.9rem', minWidth: '1.25rem' },
   checkMark: { marginLeft: 'auto', color: 'var(--accent)', fontWeight: 700 },
   navRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
