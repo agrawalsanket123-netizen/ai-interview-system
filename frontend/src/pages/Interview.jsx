@@ -4,6 +4,30 @@ import axios from 'axios'
 import BASE_URL from '../api'
 import { useAuth } from '../AuthContext'
 
+const TOTAL_SECONDS = 20 * 60 // 20 minutes
+
+function useTimer(onExpire) {
+  const [timeLeft, setTimeLeft] = useState(TOTAL_SECONDS)
+  const timerRef = useRef(null)
+
+  useEffect(() => {
+    timerRef.current = setInterval(() => {
+      setTimeLeft(t => {
+        if (t <= 1) { clearInterval(timerRef.current); onExpire(); return 0 }
+        return t - 1
+      })
+    }, 1000)
+    return () => clearInterval(timerRef.current)
+  }, [])
+
+  const mins = String(Math.floor(timeLeft / 60)).padStart(2, '0')
+  const secs = String(timeLeft % 60).padStart(2, '0')
+  const isWarning = timeLeft <= 300
+  const isDanger = timeLeft <= 60
+
+  return { mins, secs, isWarning, isDanger }
+}
+
 export default function Interview() {
   const { field } = useParams()
   const { token } = useAuth()
@@ -17,6 +41,21 @@ export default function Interview() {
   const [speaking, setSpeaking] = useState(false)
   const [voiceEnabled, setVoiceEnabled] = useState(true)
   const recognitionRef = useRef(null)
+
+  const submit = async (auto = false) => {
+    if (!auto) {
+      const unanswered = questions.filter((_, i) => !answers[i]?.trim())
+      if (unanswered.length) { alert(`${unanswered.length} question(s) unanswered.`); return }
+    }
+    stopSpeaking(); setSubmitting(true)
+    const responses = questions.map((q, i) => ({ question: q, answer: answers[i] || '' }))
+    try {
+      const res = await axios.post(`${BASE_URL}/api/interview/evaluate`, { field, responses }, { headers: { Authorization: `Bearer ${token}` } })
+      navigate('/interview/result', { state: res.data })
+    } catch { alert('Evaluation failed. Check backend.'); setSubmitting(false) }
+  }
+
+  const { mins, secs, isWarning, isDanger } = useTimer(() => submit(true))
 
   const speak = (text) => {
     if (!voiceEnabled) return
@@ -74,17 +113,6 @@ export default function Interview() {
 
   const goTo = (idx) => { stopSpeaking(); prevRef.current = current; setCurrent(idx) }
 
-  const submit = async () => {
-    const unanswered = questions.filter((_, i) => !answers[i]?.trim())
-    if (unanswered.length) { alert(`${unanswered.length} question(s) unanswered.`); return }
-    stopSpeaking(); setSubmitting(true)
-    const responses = questions.map((q, i) => ({ question: q, answer: answers[i] || '' }))
-    try {
-      const res = await axios.post(`${BASE_URL}/api/interview/evaluate`, { field, responses }, { headers: { Authorization: `Bearer ${token}` } })
-      navigate('/interview/result', { state: res.data })
-    } catch { alert('Evaluation failed. Check backend.'); setSubmitting(false) }
-  }
-
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', flexDirection: 'column', gap: '1rem' }}>
       <div style={{ width: '32px', height: '32px', border: '3px solid var(--border2)', borderTopColor: 'var(--accent)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
@@ -94,6 +122,9 @@ export default function Interview() {
 
   const q = questions[current]
   const allAnswered = questions.every((_, i) => answers[i]?.trim())
+  const timerColor = isDanger ? '#ef4444' : isWarning ? '#f59e0b' : 'var(--accent)'
+  const timerBg = isDanger ? 'rgba(239,68,68,0.1)' : isWarning ? 'rgba(245,158,11,0.1)' : 'rgba(91,141,239,0.08)'
+  const timerBorder = isDanger ? 'rgba(239,68,68,0.3)' : isWarning ? 'rgba(245,158,11,0.3)' : 'rgba(91,141,239,0.2)'
 
   return (
     <main style={s.main} className="page-enter page-pad">
@@ -106,6 +137,20 @@ export default function Interview() {
           <div style={s.fieldTag}>{field.replace(/([A-Z])/g, ' $1').trim()} Interview</div>
           <div style={s.counter}>Question {current + 1} / {questions.length}</div>
         </div>
+
+        {/* ⏱ Timer */}
+        <div style={{
+          ...s.timerBox,
+          color: timerColor,
+          background: timerBg,
+          border: `1px solid ${timerBorder}`,
+          animation: isDanger ? 'pulse-glow 1s infinite' : 'none'
+        }}>
+          <span>⏱</span>
+          <span style={s.timerText}>{mins}:{secs}</span>
+          {isWarning && <span style={{ fontSize: '0.7rem', fontWeight: 600 }}>{isDanger ? '⚠️ Hurry!' : 'Ending soon'}</span>}
+        </div>
+
         <div style={s.controls}>
           <button style={{ ...s.voiceBtn, borderColor: voiceEnabled ? 'var(--accent)' : 'var(--border)', color: voiceEnabled ? 'var(--accent)' : 'var(--text3)', background: voiceEnabled ? 'rgba(91,106,191,0.08)' : 'transparent' }}
             onClick={() => { if (voiceEnabled) stopSpeaking(); setVoiceEnabled(v => !v) }}>
@@ -161,7 +206,7 @@ export default function Interview() {
         <button style={{ ...s.navBtn, opacity: current === 0 ? 0.3 : 1 }} onClick={() => goTo(Math.max(0, current - 1))} disabled={current === 0}>← Prev</button>
         <div style={{ display: 'flex', gap: '0.75rem' }}>
           {current < questions.length - 1 && <button style={s.navBtn} onClick={() => goTo(current + 1)}>Next →</button>}
-          {allAnswered && <button style={{ ...s.submitBtn, opacity: submitting ? 0.7 : 1 }} className="btn-glow" onClick={submit} disabled={submitting}>{submitting ? 'Evaluating...' : 'Submit →'}</button>}
+          {allAnswered && <button style={{ ...s.submitBtn, opacity: submitting ? 0.7 : 1 }} className="btn-glow" onClick={() => submit(false)} disabled={submitting}>{submitting ? 'Evaluating...' : 'Submit →'}</button>}
         </div>
       </div>
 
@@ -187,6 +232,8 @@ const s = {
   header: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' },
   fieldTag: { fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent)', marginBottom: '0.3rem' },
   counter: { fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.1rem', color: 'var(--text2)' },
+  timerBox: { display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.4rem 1rem', borderRadius: '100px', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem', transition: 'all 0.3s' },
+  timerText: { fontSize: '1.2rem', fontWeight: 800, letterSpacing: '0.05em' },
   controls: { display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' },
   voiceBtn: { border: '1px solid', padding: '0.4rem 0.75rem', borderRadius: 'var(--radius-sm)', fontSize: '1rem', transition: 'all 0.2s', cursor: 'pointer', background: 'transparent' },
   replayBtn: { border: '1px solid var(--border)', padding: '0.4rem 0.75rem', borderRadius: 'var(--radius-sm)', fontSize: '0.9rem', transition: 'all 0.2s', cursor: 'pointer', background: 'transparent' },

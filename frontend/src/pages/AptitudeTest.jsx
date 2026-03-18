@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import BASE_URL from '../api'
@@ -10,6 +10,30 @@ const DIFFICULTY_STYLES = {
   Hard: { label: '🔴 Hard', color: '#ef4444', bg: 'rgba(239,68,68,0.1)', border: 'rgba(239,68,68,0.3)' },
 }
 
+const TOTAL_SECONDS = 60 * 60 // 60 minutes
+
+function useTimer(onExpire) {
+  const [timeLeft, setTimeLeft] = useState(TOTAL_SECONDS)
+  const timerRef = useRef(null)
+
+  useEffect(() => {
+    timerRef.current = setInterval(() => {
+      setTimeLeft(t => {
+        if (t <= 1) { clearInterval(timerRef.current); onExpire(); return 0 }
+        return t - 1
+      })
+    }, 1000)
+    return () => clearInterval(timerRef.current)
+  }, [])
+
+  const mins = String(Math.floor(timeLeft / 60)).padStart(2, '0')
+  const secs = String(timeLeft % 60).padStart(2, '0')
+  const isWarning = timeLeft <= 300  // last 5 mins
+  const isDanger = timeLeft <= 60    // last 1 min
+
+  return { mins, secs, isWarning, isDanger, timeLeft }
+}
+
 export default function AptitudeTest() {
   const [questions, setQuestions] = useState([])
   const [answers, setAnswers] = useState({})
@@ -19,6 +43,18 @@ export default function AptitudeTest() {
   const navigate = useNavigate()
   const { token } = useAuth()
 
+  const submit = async (auto = false) => {
+    if (!auto && Object.keys(answers).length < questions.length) {
+      alert('Please answer all questions.'); return
+    }
+    setSubmitting(true)
+    const ordered = questions.map(q => answers[q.id] || '')
+    const res = await axios.post(`${BASE_URL}/api/aptitude/submit`, { answers: ordered }, { headers: { Authorization: `Bearer ${token}` } })
+    navigate('/aptitude/result', { state: res.data })
+  }
+
+  const { mins, secs, isWarning, isDanger } = useTimer(() => submit(true))
+
   useEffect(() => {
     axios.get(`${BASE_URL}/api/aptitude/questions`).then(r => {
       setQuestions(r.data.questions); setLoading(false)
@@ -27,19 +63,15 @@ export default function AptitudeTest() {
 
   const select = (id, opt) => setAnswers(a => ({ ...a, [id]: opt }))
 
-  const submit = async () => {
-    if (Object.keys(answers).length < questions.length) { alert('Please answer all questions.'); return }
-    setSubmitting(true)
-    const ordered = questions.map(q => answers[q.id] || '')
-    const res = await axios.post(`${BASE_URL}/api/aptitude/submit`, { answers: ordered }, { headers: { Authorization: `Bearer ${token}` } })
-    navigate('/aptitude/result', { state: res.data })
-  }
-
   if (loading) return <Loader text="Loading questions..." />
 
   const q = questions[current]
   const answered = Object.keys(answers).length
   const diff = DIFFICULTY_STYLES[q.difficulty] || DIFFICULTY_STYLES['Easy']
+
+  const timerColor = isDanger ? '#ef4444' : isWarning ? '#f59e0b' : 'var(--accent)'
+  const timerBg = isDanger ? 'rgba(239,68,68,0.1)' : isWarning ? 'rgba(245,158,11,0.1)' : 'rgba(91,141,239,0.08)'
+  const timerBorder = isDanger ? 'rgba(239,68,68,0.3)' : isWarning ? 'rgba(245,158,11,0.3)' : 'rgba(91,141,239,0.2)'
 
   return (
     <main style={s.main} className="page-enter page-pad">
@@ -53,7 +85,6 @@ export default function AptitudeTest() {
           <div style={s.tag}>Aptitude Test</div>
           <div style={s.qCounterRow}>
             <div style={s.qCounter}>Question {current + 1} of {questions.length}</div>
-            {/* Difficulty Badge */}
             <div style={{
               ...s.diffBadge,
               color: diff.color,
@@ -64,6 +95,20 @@ export default function AptitudeTest() {
             </div>
           </div>
         </div>
+
+        {/* ⏱ Timer */}
+        <div style={{
+          ...s.timerBox,
+          color: timerColor,
+          background: timerBg,
+          border: `1px solid ${timerBorder}`,
+          animation: isDanger ? 'pulse-glow 1s infinite' : 'none'
+        }}>
+          <span style={s.timerIcon}>⏱</span>
+          <span style={s.timerText}>{mins}:{secs}</span>
+          {isWarning && <span style={{ fontSize: '0.7rem', fontWeight: 600 }}>{isDanger ? '⚠️ Hurry!' : 'Ending soon'}</span>}
+        </div>
+
         <div style={s.dots}>
           {questions.map((_, i) => (
             <div key={i} onClick={() => setCurrent(i)} style={{
@@ -111,7 +156,7 @@ export default function AptitudeTest() {
         {current < questions.length - 1 ? (
           <button style={s.navBtn} onClick={() => setCurrent(c => Math.min(questions.length - 1, c + 1))}>Next →</button>
         ) : (
-          <button style={{ ...s.submitBtn, opacity: submitting ? 0.7 : 1 }} className="btn-glow" onClick={submit} disabled={submitting}>
+          <button style={{ ...s.submitBtn, opacity: submitting ? 0.7 : 1 }} className="btn-glow" onClick={() => submit(false)} disabled={submitting}>
             {submitting ? 'Submitting...' : 'Submit Test →'}
           </button>
         )}
@@ -140,6 +185,9 @@ const s = {
   qCounter: { fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.1rem', color: 'var(--text2)' },
   diffBadge: { fontSize: '0.72rem', fontWeight: 700, padding: '0.2rem 0.7rem', borderRadius: '100px' },
   diffBadgeLarge: { fontSize: '0.8rem', fontWeight: 700, padding: '0.3rem 0.9rem', borderRadius: '100px' },
+  timerBox: { display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.4rem 1rem', borderRadius: '100px', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem', transition: 'all 0.3s' },
+  timerIcon: { fontSize: '1rem' },
+  timerText: { fontSize: '1.2rem', fontWeight: 800, letterSpacing: '0.05em' },
   dots: { display: 'flex', gap: '0.4rem', flexWrap: 'wrap' },
   dot: { width: '28px', height: '5px', borderRadius: '3px', cursor: 'pointer', transition: 'all 0.3s' },
   qCard: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '2.5rem', marginBottom: '2rem' },
