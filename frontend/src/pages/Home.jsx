@@ -21,26 +21,18 @@ const STEPS = [
   { n: '04', title: 'Get AI Feedback', desc: 'Each answer scored 0–10 with detailed improvement suggestions.', color: 'var(--success)' },
 ]
 
-const REVIEWS = [
-  { name: 'Rahul Sharma', role: 'Computer Science Student', rating: 5, review: 'This platform helped me crack my first technical interview! The AI feedback was incredibly detailed and helped me improve my answers significantly.' },
-  { name: 'Priya Patel', role: 'IT Engineering Student', rating: 5, review: 'The aptitude test with difficulty levels is brilliant. I could clearly see my improvement from Easy to Hard questions. Highly recommended!' },
-  { name: 'Arjun Mehta', role: 'Final Year BTech Student', rating: 4, review: 'Amazing tool for interview prep. The AI scoring is very accurate and the feedback helps you understand exactly where you went wrong.' },
-  { name: 'Sneha Joshi', role: 'Software Engineering Student', rating: 5, review: 'I love the voice input feature! It feels just like a real interview. The 6 different fields cover everything I needed to practice.' },
-  { name: 'Dev Kothari', role: 'ICT Student', rating: 5, review: 'Best free interview prep platform I have used. The Skillscope AI feedback is honest and constructive. Got placed in my dream company!' },
-  { name: 'Nisha Verma', role: 'MCA Student', rating: 4, review: 'The dashboard makes it easy to track progress over time. Really useful for consistent practice before campus placements.' },
-]
-
 const DEVS = [
-  { name: 'Harikrushna Parmar', role: 'Full Stack Developer & AI Engineer', edu: 'B.Tech in Information & Communication Technology', phone: '+91-9313114499', skills: ['React', 'FastAPI', 'Supabase', 'Groq AI'] },
-  { name: 'Sanket Agrawal', role: 'Full Stack Developer & AI Engineer', edu: 'B.Tech in Information & Communication Technology', phone: '+91-9512573981', skills: ['Python', 'React', 'REST APIs', 'Database Design'] },
+  { name: 'Harikrushna Parmar', role: 'Full Stack Developer & AI Engineer', edu: 'B.Tech in Information & Communication Technology', phone: '+91-9313114499' },
+  { name: 'Sanket Agrawal', role: 'Full Stack Developer & AI Engineer', edu: 'B.Tech in Information & Communication Technology', phone: '+91-9512573981' },
 ]
 
-function FeedbackForm() {
+function FeedbackForm({ onSubmit }) {
   const [form, setForm] = useState({ name: '', rating: 5, message: '' })
   const [submitted, setSubmitted] = useState(false)
 
   const handleSubmit = () => {
     if (!form.name || !form.message) { alert('Please fill all fields'); return }
+    onSubmit(form)
     setSubmitted(true)
   }
 
@@ -48,7 +40,7 @@ function FeedbackForm() {
     <div style={{ textAlign: 'center', padding: '2rem' }}>
       <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🎉</div>
       <div style={{ fontWeight: 700, color: 'var(--text)', fontSize: '1.1rem' }}>Thank you for your feedback!</div>
-      <div style={{ color: 'var(--text2)', fontSize: '0.875rem', marginTop: '0.25rem' }}>Your review means a lot to us.</div>
+      <div style={{ color: 'var(--text2)', fontSize: '0.875rem', marginTop: '0.25rem' }}>Your review has been added!</div>
     </div>
   )
 
@@ -92,6 +84,9 @@ export default function Home() {
   const { isLoggedIn } = useAuth()
   const [wordIdx, setWordIdx] = useState(0)
   const [visible, setVisible] = useState(true)
+  const [reviews, setReviews] = useState([])
+
+  const addReview = (review) => setReviews(r => [...r, review])
 
   useScrollAnimation()
 
@@ -220,39 +215,48 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Reviews ── */}
+      {/* ── Reviews & Feedback ── */}
       <section style={s.section}>
-        <div style={s.sectionLabel} className="scroll-animate">Reviews & Feedback</div>
-        <h2 style={s.sectionTitle} className="scroll-animate scroll-delay-1">What our users say</h2>
-        <div style={s.reviewsGrid}>
-          {REVIEWS.map((r, i) => (
-            <div key={i} style={s.reviewCard} className={`card-hover scroll-animate scroll-delay-${(i % 3) + 1}`}>
-              <div style={s.reviewHeader}>
-                <div style={s.reviewAvatar}>{r.name[0]}</div>
-                <div>
-                  <div style={s.reviewName}>{r.name}</div>
-                  <div style={s.reviewRole}>{r.role}</div>
+        <div style={s.sectionLabel}>Reviews & Feedback</div>
+        <h2 style={s.sectionTitle}>What our users say</h2>
+
+        {reviews.length === 0 ? (
+          <div style={s.noReviews}>
+            <div style={s.noReviewsIcon}>💬</div>
+            <div style={s.noReviewsTitle}>No reviews yet!</div>
+            <div style={s.noReviewsText}>Be the first one to share your experience with Skillscope AI 👇</div>
+          </div>
+        ) : (
+          <div style={s.reviewsGrid}>
+            {reviews.map((r, i) => (
+              <div key={i} style={s.reviewCard} className="card-hover">
+                <div style={s.reviewHeader}>
+                  <div style={s.reviewAvatar}>{r.name[0].toUpperCase()}</div>
+                  <div>
+                    <div style={s.reviewName}>{r.name}</div>
+                    <div style={s.reviewRole}>{'⭐'.repeat(r.rating)}</div>
+                  </div>
                 </div>
+                <div style={s.reviewText}>{r.message}</div>
               </div>
-              <div style={s.reviewStars}>{'⭐'.repeat(r.rating)}</div>
-              <div style={s.reviewText}>{r.review}</div>
-            </div>
-          ))}
-        </div>
-        <div style={s.feedbackBox} className="scroll-animate">
+            ))}
+          </div>
+        )}
+
+        <div style={s.feedbackBox}>
           <h3 style={s.feedbackTitle}>Share your experience 💬</h3>
           <p style={s.feedbackSub}>Used Skillscope AI? We'd love to hear your feedback!</p>
-          <FeedbackForm />
+          <FeedbackForm onSubmit={addReview} />
         </div>
       </section>
 
-      {/* ── Developers ── */}
+      {/* ── The Innovators ── */}
       <section style={s.section}>
-        <div style={s.sectionLabel} className="scroll-animate">Meet the Team</div>
-        <h2 style={s.sectionTitle} className="scroll-animate scroll-delay-1">Built by passionate engineers</h2>
+        <div style={s.sectionLabel}>The Innovators</div>
+        <h2 style={s.sectionTitle}>The minds who built Skillscope AI</h2>
         <div style={s.devGrid}>
           {DEVS.map((dev, i) => (
-            <div key={i} style={s.devCard} className={`card-hover scroll-animate scroll-delay-${i + 1}`}>
+            <div key={i} style={s.devCard} className="card-hover">
               <div style={s.devAvatarWrap}>
                 <div style={s.devAvatar}>
                   <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
@@ -264,11 +268,6 @@ export default function Home() {
               <div style={s.devName}>{dev.name}</div>
               <div style={s.devRole}>{dev.role}</div>
               <div style={s.devEdu}>🎓 {dev.edu}</div>
-              <div style={s.devSkills}>
-                {dev.skills.map((sk, j) => (
-                  <span key={j} style={s.devSkillTag}>{sk}</span>
-                ))}
-              </div>
               <div style={s.devContact}>
                 <span style={s.devPhone}>📞 {dev.phone}</span>
               </div>
@@ -340,13 +339,16 @@ const s = {
   whyCardDesc: { fontSize: '0.8rem', color: 'var(--text2)', lineHeight: 1.55 },
 
   // Reviews
+  noReviews: { textAlign: 'center', padding: '3rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', marginBottom: '2rem', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
+  noReviewsIcon: { fontSize: '3rem', marginBottom: '1rem' },
+  noReviewsTitle: { fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.25rem', color: 'var(--text)', marginBottom: '0.5rem' },
+  noReviewsText: { color: 'var(--text2)', fontSize: '0.9rem' },
   reviewsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem', marginBottom: '2.5rem' },
   reviewCard: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.5rem', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
   reviewHeader: { display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' },
   reviewAvatar: { width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--accent), var(--accent2))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: '1rem', flexShrink: 0 },
   reviewName: { fontWeight: 700, fontSize: '0.9rem', color: 'var(--text)' },
   reviewRole: { fontSize: '0.75rem', color: 'var(--text2)' },
-  reviewStars: { fontSize: '0.85rem', marginBottom: '0.5rem' },
   reviewText: { fontSize: '0.85rem', color: 'var(--text2)', lineHeight: 1.65 },
   feedbackBox: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '2rem', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
   feedbackTitle: { fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.25rem', color: 'var(--text)', marginBottom: '0.35rem' },
@@ -360,8 +362,6 @@ const s = {
   devName: { fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.15rem', color: 'var(--text)', marginBottom: '0.35rem' },
   devRole: { color: 'var(--accent)', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.5rem' },
   devEdu: { color: 'var(--text2)', fontSize: '0.8rem', marginBottom: '1rem' },
-  devSkills: { display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'center', marginBottom: '1rem' },
-  devSkillTag: { background: 'rgba(91,141,239,0.1)', color: 'var(--accent)', border: '1px solid rgba(91,141,239,0.2)', borderRadius: '100px', padding: '0.2rem 0.7rem', fontSize: '0.75rem', fontWeight: 600 },
   devContact: { borderTop: '1px solid var(--border)', paddingTop: '1rem', marginTop: '0.5rem' },
   devPhone: { fontSize: '0.85rem', color: 'var(--text2)', fontWeight: 500 },
 
