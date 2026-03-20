@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../AuthContext'
 import { useState, useEffect } from 'react'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
+import axios from 'axios'
+import BASE_URL from '../api'
 
 const FIELDS = [
   { id: 'DataAnalysis', label: 'Data Analysis', desc: 'EDA, visualization, statistics, pandas', icon: '📊', color: 'rgba(74,154,191,0.08)', accent: 'var(--accent3)', border: 'rgba(74,154,191,0.25)' },
@@ -29,18 +31,32 @@ const DEVS = [
 function FeedbackForm({ onSubmit }) {
   const [form, setForm] = useState({ name: '', rating: 5, message: '' })
   const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!form.name || !form.message) { alert('Please fill all fields'); return }
-    onSubmit(form)
-    setSubmitted(true)
+    setSubmitting(true)
+    try {
+      await axios.post(`${BASE_URL}/api/reviews/submit`, {
+        name: form.name,
+        rating: form.rating,
+        message: form.message
+      })
+      onSubmit(form)
+      setSubmitted(true)
+    } catch (e) {
+      alert('Failed to submit review. Please try again.')
+    }
+    setSubmitting(false)
   }
 
   if (submitted) return (
     <div style={{ textAlign: 'center', padding: '2rem' }}>
       <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🎉</div>
       <div style={{ fontWeight: 700, color: 'var(--text)', fontSize: '1.1rem' }}>Thank you for your feedback!</div>
-      <div style={{ color: 'var(--text2)', fontSize: '0.875rem', marginTop: '0.25rem' }}>Your review has been added!</div>
+      <div style={{ color: 'var(--text2)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+        {form.rating >= 4 ? 'Your review will appear on this page! ✅' : 'Your feedback has been recorded! 😊'}
+      </div>
     </div>
   )
 
@@ -68,8 +84,8 @@ function FeedbackForm({ onSubmit }) {
         rows={4}
         style={{ ...sf.input, resize: 'vertical' }}
       />
-      <button onClick={handleSubmit} style={sf.submitBtn} className="btn-glow">
-        Submit Feedback →
+      <button onClick={handleSubmit} style={{ ...sf.submitBtn, opacity: submitting ? 0.7 : 1 }} className="btn-glow" disabled={submitting}>
+        {submitting ? 'Submitting...' : 'Submit Feedback →'}
       </button>
     </div>
   )
@@ -85,10 +101,22 @@ export default function Home() {
   const [wordIdx, setWordIdx] = useState(0)
   const [visible, setVisible] = useState(true)
   const [reviews, setReviews] = useState([])
-
-  const addReview = (review) => setReviews(r => [...r, review])
+  const [reviewsLoading, setReviewsLoading] = useState(true)
 
   useScrollAnimation()
+
+  // Fetch positive reviews from backend
+  useEffect(() => {
+    axios.get(`${BASE_URL}/api/reviews`)
+      .then(r => { setReviews(r.data.reviews); setReviewsLoading(false) })
+      .catch(() => setReviewsLoading(false))
+  }, [])
+
+  const addReview = (review) => {
+    if (review.rating >= 4) {
+      setReviews(r => [{ name: review.name, rating: review.rating, message: review.message }, ...r])
+    }
+  }
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -220,7 +248,11 @@ export default function Home() {
         <div style={s.sectionLabel}>Reviews & Feedback</div>
         <h2 style={s.sectionTitle}>What our users say</h2>
 
-        {reviews.length === 0 ? (
+        {reviewsLoading ? (
+          <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text2)' }}>
+            Loading reviews...
+          </div>
+        ) : reviews.length === 0 ? (
           <div style={s.noReviews}>
             <div style={s.noReviewsIcon}>💬</div>
             <div style={s.noReviewsTitle}>No reviews yet!</div>
@@ -291,7 +323,6 @@ export default function Home() {
 
 const s = {
   main: { maxWidth: '1100px', margin: '0 auto', padding: '0 2rem 6rem', position: 'relative', zIndex: 1 },
-
   hero: { padding: '5rem 0 4rem', borderBottom: '1px solid var(--border)', marginBottom: '5rem', position: 'relative' },
   heroGlow: { position: 'absolute', top: '0%', left: '40%', width: '600px', height: '300px', pointerEvents: 'none', background: 'radial-gradient(ellipse, rgba(91,106,191,0.07) 0%, transparent 70%)' },
   heroContent: { position: 'relative', zIndex: 1, maxWidth: '680px' },
@@ -305,29 +336,24 @@ const s = {
   ctas: { display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '3.5rem' },
   btnPrimary: { background: 'linear-gradient(135deg, var(--accent), var(--accent2))', color: '#fff', padding: '0.875rem 1.875rem', fontWeight: 700, fontSize: '0.95rem', borderRadius: 'var(--radius)', display: 'inline-block' },
   btnSecondary: { background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', padding: '0.875rem 1.875rem', fontWeight: 500, fontSize: '0.95rem', borderRadius: 'var(--radius)', display: 'inline-block', transition: 'all 0.2s', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' },
-
   statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', maxWidth: '600px' },
   statCard: { borderRadius: 'var(--radius)', padding: '1.25rem', textAlign: 'center', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' },
   statVal: { fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 800, lineHeight: 1 },
   statLabel: { fontSize: '0.72rem', color: 'var(--text2)', marginTop: '0.35rem', fontWeight: 500 },
-
   section: { marginBottom: '5rem' },
   sectionLabel: { display: 'inline-block', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text2)', fontSize: '0.72rem', fontWeight: 600, padding: '0.3rem 0.9rem', borderRadius: '100px', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.08em', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' },
   sectionTitle: { fontFamily: 'var(--font-display)', fontSize: 'clamp(1.6rem, 3.5vw, 2.25rem)', fontWeight: 700, color: 'var(--text)', marginBottom: '2rem' },
-
   stepsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' },
   stepCard: { padding: '2rem 1.5rem', border: '1px solid var(--border)', borderRadius: 'var(--radius)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
   stepNum: { fontFamily: 'var(--font-display)', fontSize: '2.75rem', fontWeight: 800, lineHeight: 1, marginBottom: '0.75rem', opacity: 0.75 },
   stepTitle: { fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem', color: 'var(--text)', marginBottom: '0.5rem' },
   stepDesc: { fontSize: '0.82rem', color: 'var(--text2)', lineHeight: 1.65 },
-
   fieldsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(235px, 1fr))', gap: '1rem' },
   fieldCard: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '1.75rem', display: 'block', transition: 'all 0.25s', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
   fieldIconWrap: { width: '48px', height: '48px', borderRadius: '12px', background: 'var(--surface2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.25rem', fontSize: '1.4rem', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' },
   fieldName: { fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem', color: 'var(--text)', marginBottom: '0.4rem' },
   fieldDesc: { fontSize: '0.8rem', color: 'var(--text2)', lineHeight: 1.6, marginBottom: '1.25rem' },
   fieldArrow: { fontSize: '0.875rem', fontWeight: 700 },
-
   whySection: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '3.5rem', marginBottom: '5rem', boxShadow: '0 4px 20px rgba(0,0,0,0.04)' },
   whyInner: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem', alignItems: 'start' },
   whyLeft: {},
@@ -337,8 +363,6 @@ const s = {
   whyIcon: { fontSize: '1.25rem', flexShrink: 0, marginTop: '0.1rem' },
   whyCardTitle: { fontWeight: 700, fontSize: '0.9rem', color: 'var(--text)', marginBottom: '0.2rem' },
   whyCardDesc: { fontSize: '0.8rem', color: 'var(--text2)', lineHeight: 1.55 },
-
-  // Reviews
   noReviews: { textAlign: 'center', padding: '3rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', marginBottom: '2rem', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
   noReviewsIcon: { fontSize: '3rem', marginBottom: '1rem' },
   noReviewsTitle: { fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.25rem', color: 'var(--text)', marginBottom: '0.5rem' },
@@ -353,8 +377,6 @@ const s = {
   feedbackBox: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '2rem', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
   feedbackTitle: { fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.25rem', color: 'var(--text)', marginBottom: '0.35rem' },
   feedbackSub: { color: 'var(--text2)', fontSize: '0.875rem', marginBottom: '1.5rem' },
-
-  // Developers
   devGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' },
   devCard: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '2rem', textAlign: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
   devAvatarWrap: { display: 'flex', justifyContent: 'center', marginBottom: '1.25rem' },
@@ -364,7 +386,6 @@ const s = {
   devEdu: { color: 'var(--text2)', fontSize: '0.8rem', marginBottom: '1rem' },
   devContact: { borderTop: '1px solid var(--border)', paddingTop: '1rem', marginTop: '0.5rem' },
   devPhone: { fontSize: '0.85rem', color: 'var(--text2)', fontWeight: 500 },
-
   ctaSection: { background: 'linear-gradient(135deg, rgba(91,106,191,0.06) 0%, rgba(124,106,191,0.06) 100%)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '4rem 3rem', textAlign: 'center', position: 'relative', overflow: 'hidden', boxShadow: '0 4px 20px rgba(91,106,191,0.08)' },
   ctaGlow: { position: 'absolute', top: '-40%', left: '50%', transform: 'translateX(-50%)', width: '400px', height: '300px', pointerEvents: 'none', background: 'radial-gradient(ellipse, rgba(91,106,191,0.08) 0%, transparent 70%)' },
   ctaTitle: { fontFamily: 'var(--font-display)', fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 800, color: 'var(--text)', marginBottom: '0.75rem', position: 'relative' },
