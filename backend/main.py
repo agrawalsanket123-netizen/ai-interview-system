@@ -73,11 +73,15 @@ class InterviewAnswerRequest(BaseModel):
     field: str
     responses: List[dict]
 
+class ReviewRequest(BaseModel):
+    name: str
+    rating: int
+    message: str
+
 # ---------- AUTH HELPER ----------
 def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     token = credentials.credentials
     try:
-        # Verify token with Supabase
         user = supabase.auth.get_user(token)
         if not user or not user.user:
             raise HTTPException(status_code=401, detail="Invalid token")
@@ -178,18 +182,19 @@ def get_aptitude_questions():
     hard = [q for q in ALL_APTITUDE_QUESTIONS if q["difficulty"] == "Hard"]
     questions = random.sample(easy, 10) + random.sample(medium, 10) + random.sample(hard, 10)
     return {
-    "questions": [
-        {
-            "id": i,
-            "question": q["question"],
-            "options": q["options"],
-            "difficulty": q["difficulty"],
-            "correct_answer": q["answer"]
-        }
-        for i, q in enumerate(questions)
-    ],
-    "session_questions": questions
-}
+        "questions": [
+            {
+                "id": i,
+                "question": q["question"],
+                "options": q["options"],
+                "difficulty": q["difficulty"],
+                "correct_answer": q["answer"]
+            }
+            for i, q in enumerate(questions)
+        ],
+        "session_questions": questions
+    }
+
 @app.post("/api/aptitude/submit")
 def submit_aptitude(req: AptitudeAnswerRequest, current_user=Depends(get_current_user)):
     score = 0
@@ -235,7 +240,6 @@ def evaluate_interview(req: InterviewAnswerRequest, current_user=Depends(get_cur
     total_score = sum(r.get("score", 0) for r in results)
     overall = round(total_score / len(results), 1) if results else 0
 
-    # Save to Supabase
     try:
         supabase.table("interview_results").insert({
             "user_id": current_user.id,
@@ -264,19 +268,26 @@ def get_interview_results(current_user=Depends(get_current_user)):
         return {"results": res.data}
     except Exception as e:
         return {"results": []}
-@app.post("/api/aptitude/submit")
-def submit_aptitude(req: AptitudeAnswerRequest, current_user=Depends(get_current_user)):
-    # Re-fetch questions based on answers length
-    questions = random.sample(ALL_APTITUDE_QUESTIONS, len(req.answers))
-    score = 0
-    results = []
-    for ans, q in zip(req.answers, questions):
-        correct = ans.upper() == q["answer"]
-        if correct:
-            score += 1
-        results.append({
-            "question": q["question"],
-            "your_answer": ans.upper(),
-            "correct_answer": q["answer"],
-            "correct": correct
-        })
+
+# ---------- REVIEWS ROUTES ----------
+@app.post("/api/reviews/submit")
+def submit_review(req: ReviewRequest):
+    try:
+        supabase.table("reviews").insert({
+            "name": req.name[:50],
+            "rating": req.rating,
+            "message": req.message[:300]
+        }).execute()
+        return {"message": "Review submitted successfully!"}
+    except Exception as e:
+        print(f"Review save error: {e}")
+        raise HTTPException(status_code=400, detail="Failed to save review")
+
+@app.get("/api/reviews")
+def get_positive_reviews():
+    try:
+        res = supabase.table("reviews").select("*").gte("rating", 4).order("rating", desc=True).limit(10).execute()
+        return {"reviews": res.data}
+    except Exception as e:
+        print(f"Review fetch error: {e}")
+        return {"reviews": []}
