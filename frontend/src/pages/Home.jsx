@@ -303,48 +303,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── QR Code Section ── */}
-      <section style={s.qrSection}>
-        <div style={s.qrLeft}>
-          <div style={s.sectionLabel}>📱 Scan & Start</div>
-          <h2 style={s.qrTitle}>
-            Your next job starts<br />
-            <span style={s.qrGradient}>with one scan!</span>
-          </h2>
-          <p style={s.qrSub}>
-            Share Skillscope AI with your friends and classmates.
-            Scan the QR code to open the app instantly on any device — completely free!
-          </p>
-          <div style={s.qrSlogans}>
-            {[
-              { icon: '🚀', text: 'Practice smarter, land faster!' },
-              { icon: '🎯', text: 'AI feedback that actually helps!' },
-              { icon: '💡', text: 'Free forever. No excuses!' },
-              { icon: '🏆', text: 'Used by top engineering students!' },
-            ].map((sl, i) => (
-              <div key={i} style={s.qrSlogan}>
-                <span>{sl.icon}</span>
-                <span>{sl.text}</span>
-              </div>
-            ))}
-          </div>
-          <div style={s.qrUrl}>
-            🔗 ai-interview-system-vert.vercel.app
-          </div>
-        </div>
-        <div style={s.qrRight}>
-          <div style={s.qrBox}>
-            <img
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://ai-interview-system-vert.vercel.app&color=5B8DEF&bgcolor=ffffff`}
-              alt="Scan to open Skillscope AI"
-              style={s.qrImg}
-            />
-            <div style={s.qrCaption}>📱 Scan to open app</div>
-            <div style={s.qrCaptionSub}>Works on Android & iPhone</div>
-          </div>
-        </div>
-      </section>
-
       {/* ── CTA ── */}
       {!isLoggedIn && (
         <section style={s.ctaSection} className="scroll-animate cta-pad">
@@ -423,20 +381,6 @@ const s = {
   devEdu: { color: 'var(--text2)', fontSize: '0.8rem', marginBottom: '1rem' },
   devContact: { borderTop: '1px solid var(--border)', paddingTop: '1rem', marginTop: '0.5rem' },
   devPhone: { fontSize: '0.85rem', color: 'var(--text2)', fontWeight: 500 },
-  // QR Section
-  qrSection: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem', alignItems: 'center', background: 'linear-gradient(135deg, rgba(91,141,239,0.06) 0%, rgba(124,106,191,0.06) 100%)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '3.5rem', marginBottom: '5rem', boxShadow: '0 4px 20px rgba(91,141,239,0.08)' },
-  qrLeft: {},
-  qrTitle: { fontFamily: 'var(--font-display)', fontSize: 'clamp(1.6rem, 3.5vw, 2.25rem)', fontWeight: 800, color: 'var(--text)', marginBottom: '1rem', lineHeight: 1.2 },
-  qrGradient: { background: 'linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' },
-  qrSub: { color: 'var(--text2)', fontSize: '0.95rem', lineHeight: 1.75, marginBottom: '1.5rem' },
-  qrSlogans: { display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' },
-  qrSlogan: { display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.9rem', color: 'var(--text)', fontWeight: 600 },
-  qrUrl: { display: 'inline-block', background: 'rgba(91,141,239,0.08)', border: '1px solid rgba(91,141,239,0.2)', borderRadius: 'var(--radius-sm)', padding: '0.5rem 1rem', fontSize: '0.8rem', color: 'var(--accent)', fontWeight: 600, fontFamily: 'var(--font-mono)' },
-  qrRight: { display: 'flex', justifyContent: 'center' },
-  qrBox: { background: 'var(--surface)', border: '2px solid rgba(91,141,239,0.2)', borderRadius: 'var(--radius-lg)', padding: '1.5rem', textAlign: 'center', boxShadow: '0 8px 32px rgba(91,141,239,0.12)' },
-  qrImg: { width: '200px', height: '200px', borderRadius: '8px', display: 'block', marginBottom: '1rem' },
-  qrCaption: { fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.95rem', color: 'var(--text)', marginBottom: '0.25rem' },
-  qrCaptionSub: { fontSize: '0.75rem', color: 'var(--text2)' },
   ctaSection: { background: 'linear-gradient(135deg, rgba(91,106,191,0.06) 0%, rgba(124,106,191,0.06) 100%)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '4rem 3rem', textAlign: 'center', position: 'relative', overflow: 'hidden', boxShadow: '0 4px 20px rgba(91,106,191,0.08)' },
   ctaGlow: { position: 'absolute', top: '-40%', left: '50%', transform: 'translateX(-50%)', width: '400px', height: '300px', pointerEvents: 'none', background: 'radial-gradient(ellipse, rgba(91,106,191,0.08) 0%, transparent 70%)' },
   ctaTitle: { fontFamily: 'var(--font-display)', fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 800, color: 'var(--text)', marginBottom: '0.75rem', position: 'relative' },
